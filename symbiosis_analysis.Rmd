@@ -1,6 +1,6 @@
 ---
 title: "symbiosis growth analysis"
-author: "Analysis - David J. Weston; Experimentation - Colleen Husley & Megan Gable"
+author: "Analysis - David J. Weston<br/>Experimentation - Colleen Husley & Megan Gable"
 date: "11/16/2018"
 output:
   html_document:
@@ -60,7 +60,8 @@ The symbiosis between Sphagnum mosses and cyanobacteria has long been recognized
 ```{r, warning = FALSE, message = FALSE}
 library(tidyverse)
 library(dplyr)
-setwd("~/Documents/Manuscripts:data/Symbiosis_study_2018")
+#knitr by default will set the working directory to the source file location
+#setwd("~/Documents/Manuscripts:data/Symbiosis_study_2018")
 dat1 <- read_csv("fallax_cyano_symbiosis_colleen_10_01_2018.csv")
 names(dat1)
 summary(dat1)
