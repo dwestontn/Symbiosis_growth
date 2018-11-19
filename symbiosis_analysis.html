@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="Analysis - David J. Weston; Experimentation - Colleen Husley &amp; Megan Gable" />
+<meta name="author" content="Analysis - David J. Weston Experimentation - Colleen Husley &amp; Megan Gable" />
 
 <meta name="date" content="2018-11-16" />
 
@@ -123,7 +123,7 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">symbiosis growth analysis</h1>
-<h4 class="author"><em>Analysis - David J. Weston; Experimentation - Colleen Husley &amp; Megan Gable</em></h4>
+<h4 class="author"><em>Analysis - David J. Weston<br />Experimentation - Colleen Husley &amp; Megan Gable</em></h4>
 <h4 class="date"><em>11/16/2018</em></h4>
 
 </div>
@@ -151,7 +151,8 @@ $(document).ready(function () {
 <h1><span class="header-section-number">3</span> Data import and summary</h1>
 <pre class="r"><code>library(tidyverse)
 library(dplyr)
-setwd(&quot;~/Documents/Manuscripts:data/Symbiosis_study_2018&quot;)
+#knitr by default will set the working directory to the source file location
+#setwd(&quot;~/Documents/Manuscripts:data/Symbiosis_study_2018&quot;)
 dat1 &lt;- read_csv(&quot;fallax_cyano_symbiosis_colleen_10_01_2018.csv&quot;)
 names(dat1)</code></pre>
 <pre><code>## [1] &quot;Sample_well&quot;        &quot;component_measured&quot; &quot;condition&quot;         
