@@ -1,0 +1,147 @@
+---
+title: "symbiosis growth analysis"
+author: "Analysis - David J. Weston; Experimentation - Colleen Husley & Megan Gable"
+date: "11/16/2018"
+output:
+  html_document:
+    fig_caption: yes
+    number_sections: yes
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+
+library(captioner)
+fig_nums <- captioner(prefix = "Fig.")
+fig.1_cap <- fig_nums(name = "fig_1", 
+                        caption = "Change in growth (initial weight (wt) - final wt among the two symbiotic partners alone and when grown together (In symbiosis). Cyano in symbiosis is essenatilly free living cyano and those that were easily washed from moss surfaces. Moss in symbiosis includes those in hylaine cells and attached to moss surfaces (not collected during washing step.  Data incuded all pH conditions")
+fig.2_cap <- fig_nums(name = "fig_2", 
+                        caption = "Change in growth among interacting partners faceted by starting pH condiiton. Measured components as described in fig. 1")
+fig.3_cap <- fig_nums(name = "fig_3", 
+                        caption = "Total well biomass change from experiment start to finish. Includes moss + cyano endophyte and free living cyanobacteria not attached to plant")
+
+
+fig.4_cap <- fig_nums(name = "fig_4", 
+                        caption = "Change in pH change as measured by (final - initial values)")
+
+fig.5_cap <- fig_nums(name = "fig_5", 
+                        caption = "Absolute value of pH change as measured by (final - initial values)")
+
+```
+
+# Introduction
+The symbiosis between Sphagnum mosses and cyanobacteria has long been recognized (Limpricht, 1890) and has been implicated in improved moss growth. This together with evidence form other plant - cyanobacteria symbioses suggest that this is not just a symbiosis (interacting species), but perhaps a mutualsitc interaction -- thereby benefiting both interacting speices. To investigate this further, Colleen Hulsey and Megan Gable conducted a numer of experiments to investigate the growth consequences of cyanobacteria and sphagnum symbiosis on growth patterns at differing pH. conditions.   
+
+# Experimental approach and measurements
+
+*Experimental conditions & design
+  +conducted on 08/09/2018
+  +plants pH nitrogen depleted for 2 weeks prior to start
+  +experiment ran for 2 weeks
+  +condition 1: Nitrogen (N), 6 replicates -N, 2 replicates for low N (5mL/L NaNO3-- Mm?)
+  +Condition 2: pH, 3.5, 5.5, 8.5
+  +speices: Sphagnum fallax MN alone, Nostoc muscorum 1037 alone, both species together
+  +amounts: 1 moss capitulum, 0.1g cyanobacteria
+  +3 - 12 well plates, 2 ml liquid medium per well. 
+  
+*Measurements
+  +fluorcam: area_mm2, QY_max (initial, weekly, final)
+  +pH initial, pH weekly, pH final
+  +weight beginning and end after water removed with centrifugation
+
+*tests
+  +simple scatter and boxplots to view realtionship
+
+
+# Data import and summary
+
+```{r, warning = FALSE, message = FALSE}
+library(tidyverse)
+library(dplyr)
+setwd("~/Documents/Manuscripts:data/Symbiosis_study_2018")
+dat1 <- read_csv("fallax_cyano_symbiosis_colleen_10_01_2018.csv")
+names(dat1)
+summary(dat1)
+dim(dat1)
+
+```
+
+#Analysis
+  1. Delta growth (weight) by organism regardless of pH; 2. Delta growth by organism and by pH; 3. Delta growth for entier wel by pH
+  
+```{r, echo=FALSE, fig.width = 15, fig.align='center',fig.cap = fig.1_cap}
+
+ggplot(dat1, aes(color = component_measured,y= delta_weight_g, x= component_measured)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+
+```
+
+
+```{r, echo=FALSE, fig.width = 15, fig.align='center',fig.cap = fig.2_cap}
+
+t<-ggplot(dat1, aes(color = component_measured, y= delta_weight_g, x= component_measured)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+t+facet_grid(.~initial_pH)
+
+```
+
+
+```{r, echo=FALSE, fig.width = 15, fig.align='center',fig.cap = fig.3_cap}
+
+dat.well<-dat1 %>% filter(component_measured == "symbiosis_well")
+t<-ggplot(dat.well, aes(y= delta_weight_g, x= component_measured)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+t+facet_grid(.~initial_pH)
+
+```
+
+
+```{r, echo=FALSE, fig.width = 15, fig.align='center',fig.cap = fig.4_cap}
+
+dat.ph.change<-dat1 %>% mutate(pH_change = final_pH - initial_pH)
+
+t<-ggplot(dat.ph.change, aes(color = component_measured, y= pH_change, x= component_measured)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=16,face="bold"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        legend.text=element_text(size=16))
+t+facet_grid(.~initial_pH)
+
+
+
+```
+
+
+
+```{r, echo=FALSE, fig.width = 15, fig.align='center',fig.cap = fig.5_cap}
+dat.ph.abs.change<-dat1 %>% mutate(abs_pH_change = abs(final_pH - initial_pH))
+
+t<-ggplot(dat.ph.abs.change, aes(color = component_measured, y= abs_pH_change, x= component_measured)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=16,face="bold"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        legend.text=element_text(size=16))
+t+facet_grid(.~initial_pH)
+
+```
+
+
