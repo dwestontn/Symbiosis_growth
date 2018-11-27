@@ -16,25 +16,31 @@ output:
 library(captioner)
 fig_nums <- captioner(prefix = "Fig.")
 fig.1_cap <- fig_nums(name = "fig_1", 
-                        caption = "Change in growth (initial weight (wt) - final wt among the two symbiotic partners alone and when grown together (In symbiosis). Cyano in symbiosis is essenatilly free living cyano and those that were easily washed from moss surfaces. Moss in symbiosis includes those in hylaine cells and attached to moss surfaces (not collected during washing step.  Data incuded all pH conditions")
+                        caption = "2018 data, change in growth (initial weight (wt) - final wt among the two symbiotic partners alone and when added togather but grown seperately (_seperate) and when grown together in same well (_symbiosis). Cyano in symbiosis includes, endophytes, epiphytes and free living cyano.  Data incuded all pH conditions")
 fig.2_cap <- fig_nums(name = "fig_2", 
-                        caption = "Change in growth among interacting partners faceted by starting pH condiiton. Measured components as described in fig. 1")
+                        caption = "2018 data, change in growth among interacting partners faceted by starting pH condiiton. Measured components as described in fig. 1")
 fig.3_cap <- fig_nums(name = "fig_3", 
-                        caption = "Total well biomass change from experiment start to finish. Includes moss + cyano endophyte and free living cyanobacteria not attached to plant")
-
+                        caption = "2018 data, total well biomass change from experiment start to finish. Includes moss + cyano endophyte and free living cyanobacteria not attached to plant")
 
 fig.4_cap <- fig_nums(name = "fig_4", 
-                        caption = "Change in pH change as measured by (final - initial values)")
+                        caption = "2018 data, change in pH change as measured by (final - initial values)")
 
 fig.5_cap <- fig_nums(name = "fig_5", 
-                        caption = "Absolute value of pH change as measured by (final - initial values)")
+                        caption = "2018 data, absolute value of pH change as measured by (final - initial values)")
+fig.6_cap <- fig_nums(name = "fig_6", 
+                        caption = "2017 data, change in growth (initial weight (wt) - final wt among the two symbiotic partners alone, when added togather but grown seperately (_seperate) and when grown together in same well (_symbiosis). Conditions aggregated over pH") 
+fig.7_cap <- fig_nums(name = "fig_7", 
+                        caption = "2017 data, change in growth (initial weight (wt) - final wt among the two symbiotic partners alone, when added togather but grown seperately (_seperate) and when grown together in same well (_symbiosis). Similar to Fig. 6 except faceted by pH")
+fig.8_cap <- fig_nums(name = "fig_8", 
+                        caption = "Combined 2018 and 2017 data for change in growth (initial weight (wt) - among the two symbiotic partners alone, when added togather but grown seperately (_seperate) and when grown together in same well (_symbiosis). Data is faceted by pH")
+
 
 ```
 
 # Introduction
 The symbiosis between Sphagnum mosses and cyanobacteria has long been recognized (Limpricht, 1890) and has been implicated in improved moss growth. This together with evidence form other plant - cyanobacteria symbioses suggest that this is not just a symbiosis (interacting species), but perhaps a mutualsitc interaction -- thereby benefiting both interacting speices. To investigate this further, Colleen Hulsey and Megan Gable conducted a numer of experiments to investigate the growth consequences of cyanobacteria and sphagnum symbiosis on growth patterns at differing pH. conditions.   
 
-# Experimental approach and measurements
+# 2018 Experimental approach and measurements
 
 *Experimental conditions & design
   +conducted on 08/09/2018
@@ -55,38 +61,39 @@ The symbiosis between Sphagnum mosses and cyanobacteria has long been recognized
   +simple scatter and boxplots to view realtionship
 
 
-# Data import and summary
+# 2018 Data import and summary
 
 ```{r, warning = FALSE, message = FALSE}
 library(tidyverse)
 library(dplyr)
 #knitr by default will set the working directory to the source file location
 #setwd("~/Documents/Manuscripts:data/Symbiosis_study_2018")
-dat1 <- read_csv("fallax_cyano_symbiosis_colleen_10_01_2018.csv")
+dat1 <- read_csv("fallax_cyano_symbiosis_colleen_10_01_2018.csv") %>% mutate(delta_weight = delta_weight_g *1000)
 names(dat1)
 summary(dat1)
 dim(dat1)
 
 ```
 
-#Analysis
+#Analysis for 2018 data
   1. Delta growth (weight) by organism regardless of pH; 2. Delta growth by organism and by pH; 3. Delta growth for entier wel by pH
   
-```{r, echo=FALSE, fig.width = 15, fig.align='center',fig.cap = fig.1_cap}
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.1_cap}
 
-ggplot(dat1, aes(color = component_measured,y= delta_weight_g, x= component_measured)) +
+ggplot(dat1, aes(color = component_measured,y= delta_weight, x= component_measured)) +
   geom_boxplot(position=position_dodge(.8)) +
   geom_jitter(position=position_dodge(.8)) +
   theme(axis.text=element_text(size=12),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
         axis.title=element_text(size=16,face="bold"),
         legend.text=element_text(size=16))
 
 ```
 
 
-```{r, echo=FALSE, fig.width = 15, fig.align='center',fig.cap = fig.2_cap}
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.2_cap}
 
-t<-ggplot(dat1, aes(color = component_measured, y= delta_weight_g, x= component_measured)) +
+t<-ggplot(dat1, aes(color = component_measured, y= delta_weight, x= component_measured)) +
   geom_boxplot(position=position_dodge(.8)) +
   geom_jitter(position=position_dodge(.8)) +
   theme(axis.text=element_text(size=12),
@@ -98,10 +105,10 @@ t+facet_grid(.~initial_pH)
 ```
 
 
-```{r, echo=FALSE, fig.width = 15, fig.align='center',fig.cap = fig.3_cap}
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.3_cap}
 
-dat.well<-dat1 %>% filter(component_measured == "symbiosis_well")
-t<-ggplot(dat.well, aes(y= delta_weight_g, x= component_measured)) +
+dat.well<-dat1 %>% filter(component_measured == "Cyanobacteria_moss_symbiosis")
+t<-ggplot(dat.well, aes(y= delta_weight, x= component_measured)) +
   geom_boxplot(position=position_dodge(.8)) +
   geom_jitter(position=position_dodge(.8)) +
   theme(axis.text=element_text(size=12),
@@ -112,7 +119,7 @@ t+facet_grid(.~initial_pH)
 ```
 
 
-```{r, echo=FALSE, fig.width = 15, fig.align='center',fig.cap = fig.4_cap}
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.4_cap}
 
 dat.ph.change<-dat1 %>% mutate(pH_change = final_pH - initial_pH)
 
@@ -131,7 +138,7 @@ t+facet_grid(.~initial_pH)
 
 
 
-```{r, echo=FALSE, fig.width = 15, fig.align='center',fig.cap = fig.5_cap}
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.5_cap}
 dat.ph.abs.change<-dat1 %>% mutate(abs_pH_change = abs(final_pH - initial_pH))
 
 t<-ggplot(dat.ph.abs.change, aes(color = component_measured, y= abs_pH_change, x= component_measured)) +
@@ -144,5 +151,83 @@ t<-ggplot(dat.ph.abs.change, aes(color = component_measured, y= abs_pH_change, x
 t+facet_grid(.~initial_pH)
 
 ```
+
+
+# 2017 Experimental approach and measurements
+
+need experimental details here...
+
+
+
+
+
+# 2017 Data import and summary
+
+```{r, warning = FALSE, message = FALSE}
+
+dat2 <- read_csv("fallax_cyano_symbiosis_allyssa_colleen_2017.csv")
+dat3 <- dat2 %>% filter(pH == 3.5 | pH == 5.5 | pH == 8.5)
+names(dat3)
+summary(dat3)
+dim(dat3)
+
+```
+
+
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.6_cap}
+
+ggplot(dat3, aes(color = condition,y= delta_weight, x= condition)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+
+
+```
+
+
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.7_cap}
+
+t<-ggplot(dat3, aes(color = condition,y= delta_weight, x= condition)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+t+facet_grid(.~pH)
+
+```
+
+
+
+
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.8_cap}
+
+dat.2018 <- dat1 %>% filter(component_measured == "moss_alone" | component_measured == "cyano_alone" | component_measured == "Cyanobacteria_moss_symbiosis" |
+                              component_measured =="Cyanobacteria_moss_seperate") %>%
+  select(condition = component_measured, pH = initial_pH, delta_weight) %>%
+  mutate(condition = paste0(condition, "_2018"))
+
+dat.2017 <- dat3 %>% select(condition, pH, delta_weight) %>%
+  mutate(condition = paste0(condition, "_2017"))
+
+dat.combined<-rbind(dat.2018, dat.2017)
+
+
+t<-ggplot(dat.combined, aes(color = condition,y= delta_weight, x= condition)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+t+facet_grid(.~pH)
+
+
+
+```
+
 
 
