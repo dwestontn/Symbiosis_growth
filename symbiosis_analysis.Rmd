@@ -75,7 +75,7 @@ dim(dat1)
 
 ```
 
-#Analysis for 2018 data
+# Boxplot analysis for 2018 data
   1. Delta growth (weight) by organism regardless of pH; 2. Delta growth by organism and by pH; 3. Delta growth for entier wel by pH
   
 ```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.1_cap}
@@ -174,6 +174,8 @@ dim(dat3)
 ```
 
 
+# Boxplot analysis of 2017 data
+
 ```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.6_cap}
 
 ggplot(dat3, aes(color = condition,y= delta_weight, x= condition)) +
@@ -229,5 +231,111 @@ t+facet_grid(.~pH)
 
 ```
 
+
+# ANOVA analysis of 2017 and 2018 data.
+
+Specifically testing if cyano and moss grown alone, increased in growth at a different rate than when grown together in smbiosis.
+
+
+```{r, echo=FALSE}
+
+# converting pH and condition to factor
+
+dat.2017$pH<-factor(dat.2017$pH, levels =c(3.5, 5.5, 8.5), labels = c("pH_3.5", "pH_5.5", "pH_8.5"))
+dat.2017$condition<-factor(dat.2017$condition, levels =c("cyano_alone_2017", "moss_alone_2017", "Cyanobacteria_moss_seperate_2017", "Cyanobacteria_moss_symbiosis_2017"), labels = c("cyano_alone_2017", "moss_alone_2017", "Cyanobacteria_moss_seperate_2017", "Cyanobacteria_moss_symbiosis_2017"))
+
+#check with str(dat.2017)
+
+dat.2017.aov2<-aov(delta_weight ~ condition + pH + condition:pH, data = dat.2017)
+summary(dat.2017.aov2)
+
+```
+
+computing summary stats
+
+```{r, echo=FALSE}
+
+dat.2017 %>% group_by(condition, pH) %>% summarize(count = n(), mean = mean(delta_weight, na.rm = TRUE), sd = sd(delta_weight, na.rm = TRUE))
+
+```
+
+
+mean seperation iwth Tukeys
+
+```{r, echo=FALSE}
+TukeyHSD(dat.2017.aov2, which = "condition")
+
+```
+
+resdiual check
+
+```{r, echo=FALSE}
+par(mfrow = c(1,2))
+plot(dat.2017.aov2, 1)
+plot(dat.2017.aov2, 2)
+
+```
+
+```{r, echo=FALSE}
+# Extract the residuals
+aov_residuals <- residuals(object = dat.2017.aov2)
+# Run Shapiro-Wilk test
+shapiro.test(x = aov_residuals)
+
+```
+
+
+Starting the 2018 data
+
+```{r, echo=FALSE}
+
+# converting pH and condition to factor
+
+dat.2018$pH<-factor(dat.2018$pH, levels =c(3.5, 5.5, 8.5), labels = c("pH_3.5", "pH_5.5", "pH_8.5"))
+dat.2018$condition<-factor(dat.2018$condition, levels =c("moss_alone_2018", "cyano_alone_2018", "Cyanobacteria_moss_symbiosis_2018", "Cyanobacteria_moss_seperate_2018"), labels = c("moss_alone_2018", "cyano_alone_2018", "Cyanobacteria_moss_symbiosis_2018", "Cyanobacteria_moss_seperate_2018"))
+
+#check with str(dat.2018)
+
+dat.2018.aov2<-aov(delta_weight ~ condition + pH + condition:pH, data = dat.2018)
+summary(dat.2018.aov2)
+
+```
+
+computing summary stats for 2018
+
+```{r, echo=FALSE}
+
+dat.2018 %>% group_by(condition, pH) %>% summarize(count = n(), mean = mean(delta_weight, na.rm = TRUE), sd = sd(delta_weight, na.rm = TRUE))
+
+```
+
+
+mean seperation with Tukeys for 2018
+
+```{r, echo=FALSE}
+
+
+TukeyHSD(dat.2018.aov2, which = "condition")
+
+```
+
+resdiual check 2018 data
+
+```{r, echo=FALSE}
+par(mfrow = c(1,2))
+plot(dat.2018.aov2, 1)
+plot(dat.2018.aov2, 2)
+
+```
+
+Shapiro-Wilk test for normality
+
+```{r, echo=FALSE}
+# Extract the residuals
+aov_residuals <- residuals(object = dat.2017.aov2)
+# Run Shapiro-Wilk test
+shapiro.test(x = aov_residuals)
+
+```
 
 
