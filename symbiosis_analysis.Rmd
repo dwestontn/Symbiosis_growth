@@ -270,6 +270,7 @@ TukeyHSD(dat.2017.aov2, which = "condition")
 resdiual check
 
 ```{r, echo=FALSE}
+
 par(mfrow = c(1,2))
 plot(dat.2017.aov2, 1)
 plot(dat.2017.aov2, 2)
@@ -294,6 +295,8 @@ Starting the 2018 data
 dat.2018$pH<-factor(dat.2018$pH, levels =c(3.5, 5.5, 8.5), labels = c("pH_3.5", "pH_5.5", "pH_8.5"))
 dat.2018$condition<-factor(dat.2018$condition, levels =c("moss_alone_2018", "cyano_alone_2018", "Cyanobacteria_moss_symbiosis_2018", "Cyanobacteria_moss_seperate_2018"), labels = c("moss_alone_2018", "cyano_alone_2018", "Cyanobacteria_moss_symbiosis_2018", "Cyanobacteria_moss_seperate_2018"))
 
+
+
 #check with str(dat.2018)
 
 dat.2018.aov2<-aov(delta_weight ~ condition + pH + condition:pH, data = dat.2018)
@@ -314,7 +317,6 @@ mean seperation with Tukeys for 2018
 
 ```{r, echo=FALSE}
 
-
 TukeyHSD(dat.2018.aov2, which = "condition")
 
 ```
@@ -333,8 +335,19 @@ Shapiro-Wilk test for normality
 ```{r, echo=FALSE}
 # Extract the residuals
 aov_residuals <- residuals(object = dat.2017.aov2)
-# Run Shapiro-Wilk test
+# Run Shapiro-Wilk test for normatily of residuals
 shapiro.test(x = aov_residuals)
+
+
+```
+
+
+```{r}
+#Levene's Test for homogenity of variances
+
+library(car)
+leveneTest(delta_weight ~ condition, data = dat.2018)
+leveneTest(delta_weight ~ pH, data = dat.2018)
 
 ```
 

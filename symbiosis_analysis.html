@@ -419,6 +419,30 @@ Fig. 8: Combined 2018 and 2017 data for change in growth (initial weight (wt) - 
 ## 
 ## data:  aov_residuals
 ## W = 0.96343, p-value = 0.03459</code></pre>
+<pre class="r"><code>#Levene's Test for homogenity of variances
+
+library(car)</code></pre>
+<pre><code>## Loading required package: carData</code></pre>
+<pre><code>## 
+## Attaching package: 'car'</code></pre>
+<pre><code>## The following object is masked from 'package:dplyr':
+## 
+##     recode</code></pre>
+<pre><code>## The following object is masked from 'package:purrr':
+## 
+##     some</code></pre>
+<pre class="r"><code>leveneTest(delta_weight ~ condition, data = dat.2018)</code></pre>
+<pre><code>## Levene's Test for Homogeneity of Variance (center = median)
+##       Df F value  Pr(&gt;F)  
+## group  3  3.7312 0.01787 *
+##       44                  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+<pre class="r"><code>leveneTest(delta_weight ~ pH, data = dat.2018)</code></pre>
+<pre><code>## Levene's Test for Homogeneity of Variance (center = median)
+##       Df F value Pr(&gt;F)
+## group  2  0.0209 0.9793
+##       45</code></pre>
 </div>
 
 
