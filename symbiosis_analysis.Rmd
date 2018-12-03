@@ -6,7 +6,9 @@ output:
   html_document:
     fig_caption: yes
     number_sections: yes
+    theme: cerulean
     toc: yes
+    toc_float: yes
   pdf_document:
     toc: yes
 ---
@@ -40,7 +42,7 @@ fig.8_cap <- fig_nums(name = "fig_8",
 # Introduction
 The symbiosis between Sphagnum mosses and cyanobacteria has long been recognized (Limpricht, 1890) and has been implicated in improved moss growth. This together with evidence form other plant - cyanobacteria symbioses suggest that this is not just a symbiosis (interacting species), but perhaps a mutualsitc interaction -- thereby benefiting both interacting speices. To investigate this further, Colleen Hulsey and Megan Gable conducted a numer of experiments to investigate the growth consequences of cyanobacteria and sphagnum symbiosis on growth patterns at differing pH. conditions.   
 
-# 2018 Experimental approach and measurements
+# Growth 2018 symbiosis approach and measurements
 
 *Experimental conditions & design
   +conducted on 08/09/2018
@@ -61,7 +63,7 @@ The symbiosis between Sphagnum mosses and cyanobacteria has long been recognized
   +simple scatter and boxplots to view realtionship
 
 
-# 2018 Data import and summary
+# Growth 2018 data import and summary
 
 ```{r, warning = FALSE, message = FALSE}
 library(tidyverse)
@@ -75,7 +77,7 @@ dim(dat1)
 
 ```
 
-# Boxplot analysis for 2018 data
+# Growth 2018 data boxplot analysis
   1. Delta growth (weight) by organism regardless of pH; 2. Delta growth by organism and by pH; 3. Delta growth for entier wel by pH
   
 ```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.1_cap}
@@ -153,7 +155,7 @@ t+facet_grid(.~initial_pH)
 ```
 
 
-# 2017 Experimental approach and measurements
+# Growth 2017 symbiosis approach and measurements
 
 need experimental details here...
 
@@ -161,7 +163,7 @@ need experimental details here...
 
 
 
-# 2017 Data import and summary
+# Growth 2017 data import and summary
 
 ```{r, warning = FALSE, message = FALSE}
 
@@ -350,5 +352,33 @@ leveneTest(delta_weight ~ condition, data = dat.2018)
 leveneTest(delta_weight ~ pH, data = dat.2018)
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
