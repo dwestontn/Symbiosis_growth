@@ -300,7 +300,7 @@ dat.2018$condition<-factor(dat.2018$condition, levels =c("moss_alone_2018", "cya
 
 #check with str(dat.2018)
 
-dat.2018.aov2<-aov(delta_weight ~ condition + pH + condition:pH, data = dat.2018)
+dat.2018.aov2 <- aov(delta_weight ~ condition + pH + condition:pH, data = dat.2018)
 summary(dat.2018.aov2)
 
 ```
