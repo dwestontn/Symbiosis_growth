@@ -1,5 +1,5 @@
 ---
-title: "symbiosis growth analysis"
+title: "Tripartite_analysis_manuscript"
 author: "Analysis - David J. Weston<br/>Experimentation - Colleen Husley & Megan Gable"
 date: "11/16/2018"
 output:
@@ -16,6 +16,7 @@ output:
 ```{r setup, include=FALSE}
 
 library(captioner)
+library(knitr)
 fig_nums <- captioner(prefix = "Fig.")
 fig.1_cap <- fig_nums(name = "fig_1", 
                         caption = "2018 data, change in growth (initial weight (wt) - final wt among the two symbiotic partners alone and when added togather but grown seperately (_seperate) and when grown together in same well (_symbiosis). Cyano in symbiosis includes, endophytes, epiphytes and free living cyano.  Data incuded all pH conditions")
@@ -39,10 +40,12 @@ fig.8_cap <- fig_nums(name = "fig_8",
 
 ```
 
-# Introduction
+
+#Growth Analysis for Moss and Cyanobacteria
+## Introduction
 The symbiosis between Sphagnum mosses and cyanobacteria has long been recognized (Limpricht, 1890) and has been implicated in improved moss growth. This together with evidence form other plant - cyanobacteria symbioses suggest that this is not just a symbiosis (interacting species), but perhaps a mutualsitc interaction -- thereby benefiting both interacting speices. To investigate this further, Colleen Hulsey and Megan Gable conducted a numer of experiments to investigate the growth consequences of cyanobacteria and sphagnum symbiosis on growth patterns at differing pH. conditions.   
 
-# Growth 2018 symbiosis approach and measurements
+### Growth 2018 symbiosis approach and measurements
 
 *Experimental conditions & design
   +conducted on 08/09/2018
@@ -63,7 +66,7 @@ The symbiosis between Sphagnum mosses and cyanobacteria has long been recognized
   +simple scatter and boxplots to view realtionship
 
 
-# Growth 2018 data import and summary
+### Growth 2018 data import and summary
 
 ```{r, warning = FALSE, message = FALSE}
 library(tidyverse)
@@ -76,7 +79,7 @@ dim(dat1)
 
 ```
 
-# Growth 2018 data boxplot analysis
+### Growth 2018 data boxplot analysis
   1. Delta growth (weight) by organism regardless of pH; 2. Delta growth by organism and by pH; 3. Delta growth for entier wel by pH
   
 ```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.1_cap}
@@ -154,7 +157,7 @@ t+facet_grid(.~initial_pH)
 ```
 
 
-# Growth 2017 symbiosis approach and measurements
+## Growth 2017 symbiosis approach and measurements
 
 need experimental details here...
 
@@ -162,7 +165,7 @@ need experimental details here...
 
 
 
-# Growth 2017 data import and summary
+### Growth 2017 data import and summary
 
 ```{r, warning = FALSE, message = FALSE}
 
@@ -175,7 +178,7 @@ dim(dat3)
 ```
 
 
-# Boxplot analysis of 2017 data
+### Boxplot analysis of 2017 data
 
 ```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.6_cap}
 
@@ -233,7 +236,7 @@ t+facet_grid(.~pH)
 ```
 
 
-# ANOVA analysis of 2017 and 2018 data.
+### ANOVA analysis of 2017 and 2018 data.
 
 Specifically testing if cyano and moss grown alone, increased in growth at a different rate than when grown together in smbiosis.
 
@@ -352,22 +355,219 @@ leveneTest(delta_weight ~ pH, data = dat.2018)
 
 ```
 
+# Metabolite Analysis
+
+##Introduction to design
+
+(in progress)
+
+## metablite change when cyanobacteria pellet is crossfed with moss supernantant
+
+Goal -- determine significant changes in metabolites between cyanobacteria and moss using kruskal wallis test.
+
+To look at how suernatant from 1) cyano pellet when incubated with moss supernatant (Ph2-super-Nmusc-SfallaxSupp) compares to 2) moss only supernantant (Ph1-super-Sfallax).
+
+```{r, echo=FALSE}
+
+library(broom)
+met.dat<-read.csv("data_formated_input_06262018.csv")
+#met.dat%>%group_by(treat_cond) %>%tally()
+#head(met.dat)
+
+a<-met.dat %>% select(treat_cond, JGI_compound_id, peak_ht) %>% filter(treat_cond %in% c("Ph2-super-Nmusc-SfallaxSupp", "Ph1-super-Sfallax"))
+
+#to account for the dillution from phase 1 to phase 2
+a<-a %>% mutate(peak_ht = ifelse(treat_cond == "Ph1-super-Sfallax", peak_ht/2, peak_ht * 1))
+a$JGI_compound_id <- as.factor(a$JGI_compound_id)
+a$treat_cond <- as.factor(a$treat_cond)
+
+b<- a %>% group_by(JGI_compound_id) %>% do(tidy(kruskal.test(x= .$peak_ht, g = .$treat_cond))) %>% select(JGI_compound_id, statistic, p.value)
+
+c <-a %>% filter(treat_cond == "Ph2-super-Nmusc-SfallaxSupp") %>% group_by(JGI_compound_id) %>% mutate(mean_Pelcyano_SupMoss = mean(peak_ht)) %>% select(JGI_compound_id, mean_Pelcyano_SupMoss) %>% unique()
+
+c2 <- a %>% filter(treat_cond == "Ph1-super-Sfallax") %>% group_by(JGI_compound_id) %>% mutate(mean_super_moss = mean(peak_ht)) %>% select(JGI_compound_id, mean_super_moss) %>% unique()
+
+c3 <- left_join(c,c2, by = "JGI_compound_id") %>% mutate(met_direction = ifelse(mean_Pelcyano_SupMoss > mean_super_moss, "eluted_by cyano",  "uptake_up by cyano"))
+
+crossfeed_PelCyano_MossSuper<- met.dat %>% select(JGI_compound_id, compound_atlas_ID, label, Identified_metabolite) %>% unique()
+
+crossfeed_PelCyano_MossSuper$JGI_compound_id <-as.factor(crossfeed_PelCyano_MossSuper$JGI_compound_id)
+crossfeed_PelCyano_MossSuper$compound_atlas_ID <-as.factor(crossfeed_PelCyano_MossSuper$compound_atlas_ID)
+crossfeed_PelCyano_MossSuper$Identified_metabolite <-as.factor(crossfeed_PelCyano_MossSuper$Identified_metabolite)
+
+crossfeed_PelCyano_MossSuper<-as.data.frame(crossfeed_PelCyano_MossSuper)
+c3<-as.data.frame(c3)
+crossfeed_PelCyano_MossSuper <- left_join(c3, crossfeed_PelCyano_MossSuper, by = "JGI_compound_id")
+
+crossfeed_PelCyano_MossSuper<-left_join(b, crossfeed_PelCyano_MossSuper, by = "JGI_compound_id")
+crossfeed_PelCyano_MossSuper<-crossfeed_PelCyano_MossSuper %>% arrange(p.value)
+
+#output
+kable(crossfeed_PelCyano_MossSuper[1:8, c(-1, -2, -4,-5)], caption = "Header- crossfed cyano pellet with moss supernatant")
+
+num_sig_elluted<-nrow(crossfeed_PelCyano_MossSuper %>% filter(p.value <= 0.05 & met_direction == "eluted_by cyano"))
+num_sig_uptake<-nrow(crossfeed_PelCyano_MossSuper %>% filter(p.value <= 0.05 & met_direction == "uptake_up by cyano"))
+
+print(paste("# elluted cyanobacteria metabolites (p.value <= 0.05) is:", num_sig_elluted))
+print(paste("# taken cyanobacteria metabolites (p.value <= 0.05) is:", num_sig_uptake))
+
+#write_excel_csv(crossfeed_PelCyano_MossSuper, "crossfeed_output_PelCyano_MossSuper_halfstrength.csv")
+
+```
+
+## metablite change when moss pellet is crossfed with cyanobacteria supernantant
+
+Goal -- determine significant changes in metabolites between cyanobacteria and moss using kruskal wallis test.
+
+Supernatant changes from 1) suernatant from moss pellet when incubated with cyanobacteria supernatant (Ph2-super-Sfallax-NmuscSupp) compared to 2) cyanobacteria pellet only supernantant (Ph1-super-Nmusc).
+
+
+```{r, echo=FALSE}
+
+x<-met.dat %>% select(treat_cond, JGI_compound_id, peak_ht) %>% filter(treat_cond %in% c("Ph2-super-Sfallax-NmuscSupp", "Ph1-super-Nmusc"))
+
+#to account for the dillution from phase 1 to phase 2
+x<-x %>% mutate(peak_ht = ifelse(treat_cond == "Ph1-super-Nmusc", peak_ht/2, peak_ht * 1))
+x$JGI_compound_id <- as.factor(x$JGI_compound_id)
+x$treat_cond <- as.factor(x$treat_cond)
+y<- x %>% group_by(JGI_compound_id) %>% do(tidy(kruskal.test(x= .$peak_ht, g = .$treat_cond))) %>% select(JGI_compound_id, statistic, p.value) 
+z <-x %>% filter(treat_cond == "Ph2-super-Sfallax-NmuscSupp") %>% group_by(JGI_compound_id) %>% mutate(mean_PelMoss_SupCyano = mean(peak_ht)) %>% select(JGI_compound_id, mean_PelMoss_SupCyano) %>% unique()
+z2 <- x %>% filter(treat_cond == "Ph1-super-Nmusc") %>% group_by(JGI_compound_id) %>% mutate(mean_super_cyano = mean(peak_ht)) %>% select(JGI_compound_id, mean_super_cyano) %>% unique()
+z3 <- left_join(z,z2, by = "JGI_compound_id") %>% mutate(met_direction = ifelse(mean_PelMoss_SupCyano > mean_super_cyano, "eluted_by moss",  "uptake_up by moss"))
+
+
+crossfeed_PelMoss_CyanoSuper<- met.dat %>% select(JGI_compound_id, compound_atlas_ID, label, Identified_metabolite) %>% unique()
+crossfeed_PelMoss_CyanoSuper$JGI_compound_id <-as.factor(crossfeed_PelMoss_CyanoSuper$JGI_compound_id)
+crossfeed_PelMoss_CyanoSuper$compound_atlas_ID <-as.factor(crossfeed_PelMoss_CyanoSuper$compound_atlas_ID)
+crossfeed_PelMoss_CyanoSuper$Identified_metabolite <-as.factor(crossfeed_PelMoss_CyanoSuper$Identified_metabolite)
+
+crossfeed_PelMoss_CyanoSuper<-as.data.frame(crossfeed_PelMoss_CyanoSuper)
+z3<-as.data.frame(z3)
+crossfeed_PelMoss_CyanoSuper <- left_join(z3, crossfeed_PelMoss_CyanoSuper, by = "JGI_compound_id")
+
+crossfeed_PelMoss_CyanoSuper<-left_join(y, crossfeed_PelMoss_CyanoSuper, by = "JGI_compound_id")
+crossfeed_PelMoss_CyanoSuper<-crossfeed_PelMoss_CyanoSuper %>% arrange(p.value)
+
+kable(crossfeed_PelMoss_CyanoSuper[1:8, c(-1, -2, -4,-5)], caption = "Header- crossfed moss pellet with cyanobacteria supernatant")
+
+num_sig_elluted<-nrow(crossfeed_PelMoss_CyanoSuper %>% filter(p.value <= 0.05 & met_direction == "eluted_by moss"))
+num_sig_uptake<-nrow(crossfeed_PelMoss_CyanoSuper %>% filter(p.value <= 0.05 & met_direction == "uptake_up by moss"))
+
+print(paste("# elluted moss metabolites (p.value <= 0.05) is:", num_sig_elluted))
+print(paste("# taken moss metabolites (p.value <= 0.05) is:", num_sig_uptake))
+
+#write_excel_csv(crossfeed_PelMoss_CyanoSuper, "crossfeed_output_PelMoss_CyanoSuper_halfstrength.csv")
+
+
+```
+
+
+## metablite change when fungus pellet is crossfed with cyanobacteria supernantant
+
+Goal -- determine significant changes in metabolites between fungus and cyanobacteria using kruskal wallis test.
+
+Supernatant changes from 1) suernatant from fungus pellet when incubated with cyanobacteria supernatant (Ph2-super-Tacro-NmuscSupp) compared to 2) cyanobacteria pellet only supernantant (Ph1-super-Nmusc).
+
+
+```{r, echo=FALSE}
+
+h<-met.dat %>% select(treat_cond, JGI_compound_id, peak_ht) %>% filter(treat_cond %in% c("Ph2-super-Tacro-NmuscSupp", "Ph1-super-Nmusc"))
+
+#to account for the dillution from phase 1 to phase 2
+h<-h %>% mutate(peak_ht = ifelse(treat_cond == "Ph1-super-Sfallax", peak_ht/2, peak_ht * 1))
+h$JGI_compound_id <- as.factor(h$JGI_compound_id)
+h$treat_cond <- as.factor(h$treat_cond)
+
+#Kruskal Wallis test
+i<- h %>% group_by(JGI_compound_id) %>% do(tidy(kruskal.test(x= .$peak_ht, g = .$treat_cond))) %>% select(JGI_compound_id, statistic, p.value)
+
+#datatable creation
+j <-h %>% filter(treat_cond == "Ph2-super-Tacro-NmuscSupp") %>% group_by(JGI_compound_id) %>% mutate(mean_Pelfung_SupCyano = mean(peak_ht)) %>% select(JGI_compound_id, mean_Pelfung_SupCyano) %>% unique()
+
+j2 <- h %>% filter(treat_cond == "Ph1-super-Nmusc") %>% group_by(JGI_compound_id) %>% mutate(mean_super_cyano = mean(peak_ht)) %>% select(JGI_compound_id, mean_super_cyano) %>% unique()
+
+j3 <- left_join(j,j2, by = "JGI_compound_id") %>% mutate(met_direction = ifelse(mean_Pelfung_SupCyano > mean_super_cyano, "eluted_by fungus",  "uptake_up by fungus"))
+
+crossfeed_PelFung_CyanoSuper<- met.dat %>% select(JGI_compound_id, compound_atlas_ID, label, Identified_metabolite) %>% unique()
+
+crossfeed_PelFung_CyanoSuper$JGI_compound_id <-as.factor(crossfeed_PelFung_CyanoSuper$JGI_compound_id)
+crossfeed_PelFung_CyanoSuper$compound_atlas_ID <-as.factor(crossfeed_PelFung_CyanoSuper$compound_atlas_ID)
+crossfeed_PelFung_CyanoSuper$Identified_metabolite <-as.factor(crossfeed_PelFung_CyanoSuper$Identified_metabolite)
+
+crossfeed_PelFung_CyanoSuper<-as.data.frame(crossfeed_PelFung_CyanoSuper)
+j3<-as.data.frame(j3)
+crossfeed_PelFung_CyanoSuper <- left_join(j3, crossfeed_PelFung_CyanoSuper, by = "JGI_compound_id")
+
+crossfeed_PelFung_CyanoSuper<-left_join(i, crossfeed_PelFung_CyanoSuper, by = "JGI_compound_id")
+crossfeed_PelFung_CyanoSuper<-crossfeed_PelFung_CyanoSuper %>% arrange(p.value)
+
+#output
+kable(crossfeed_PelFung_CyanoSuper[1:8, c(-1, -2, -4,-5)], caption = "Header- crossfed fungus pellet with cyano supernatant")
+
+num_sig_elluted<-nrow(crossfeed_PelFung_CyanoSuper %>% filter(p.value <= 0.05 & met_direction == "eluted_by fungus"))
+num_sig_uptake<-nrow(crossfeed_PelFung_CyanoSuper %>% filter(p.value <= 0.05 & met_direction == "uptake_up by fungus"))
+
+print(paste("# elluted fungal metabolites (p.value <= 0.05) is:", num_sig_elluted))
+print(paste("# taken fungal metabolites (p.value <= 0.05) is:", num_sig_uptake))
+
+#write_excel_csv(crossfeed_PelFung_CyanoSuper, "crossfeed_output_PelFung_CyanoSuper_halfstrength.csv")
+
+```
 
 
 
+## metablite change when fungus pellet is crossfed with moss supernantant
+
+Goal -- determine significant changes in metabolites between fungus and moss using kruskal wallis test.
+
+Supernatant changes from 1) suernatant from fungus pellet when incubated with moss supernatant (Ph2-super-Tacro-SfallaxSupp) compared to 2) moss pellet only supernantant (Ph1-super-Sfallax).
 
 
+```{r, echo=FALSE}
+
+k<-met.dat %>% select(treat_cond, JGI_compound_id, peak_ht) %>% filter(treat_cond %in% c("Ph2-super-Tacro-SfallaxSupp", "Ph1-super-Sfallax"))
+
+#to account for the dillution from phase 1 to phase 2
+k<-k %>% mutate(peak_ht = ifelse(treat_cond == "Ph1-super-Sfallax", peak_ht/2, peak_ht * 1))
+k$JGI_compound_id <- as.factor(k$JGI_compound_id)
+k$treat_cond <- as.factor(k$treat_cond)
+
+#Kruskal Wallis test
+l<- k %>% group_by(JGI_compound_id) %>% do(tidy(kruskal.test(x= .$peak_ht, g = .$treat_cond))) %>% select(JGI_compound_id, statistic, p.value)
+
+#datatable creation
+m <-k %>% filter(treat_cond == "Ph2-super-Tacro-SfallaxSupp") %>% group_by(JGI_compound_id) %>% mutate(mean_Pelfung_SupMoss = mean(peak_ht)) %>% select(JGI_compound_id, mean_Pelfung_SupMoss) %>% unique()
+
+m2 <- k %>% filter(treat_cond == "Ph1-super-Sfallax") %>% group_by(JGI_compound_id) %>% mutate(mean_super_moss = mean(peak_ht)) %>% select(JGI_compound_id, mean_super_moss) %>% unique()
+
+m3 <- left_join(m,m2, by = "JGI_compound_id") %>% mutate(met_direction = ifelse(mean_Pelfung_SupMoss > mean_super_moss, "eluted_by fungus",  "uptake_up by fungus"))
+
+crossfeed_PelFung_MossSuper<- met.dat %>% select(JGI_compound_id, compound_atlas_ID, label, Identified_metabolite) %>% unique()
+
+crossfeed_PelFung_MossSuper$JGI_compound_id <-as.factor(crossfeed_PelFung_MossSuper$JGI_compound_id)
+crossfeed_PelFung_MossSuper$compound_atlas_ID <-as.factor(crossfeed_PelFung_MossSuper$compound_atlas_ID)
+crossfeed_PelFung_MossSuper$Identified_metabolite <-as.factor(crossfeed_PelFung_MossSuper$Identified_metabolite)
+
+crossfeed_PelFung_MossSuper<-as.data.frame(crossfeed_PelFung_MossSuper)
+m3<-as.data.frame(m3)
+crossfeed_PelFung_MossSuper <- left_join(m3, crossfeed_PelFung_MossSuper, by = "JGI_compound_id")
+
+crossfeed_PelFung_MossSuper<-left_join(l, crossfeed_PelFung_MossSuper, by = "JGI_compound_id")
+crossfeed_PelFung_MossSuper<-crossfeed_PelFung_MossSuper %>% arrange(p.value)
+
+#output
+kable(crossfeed_PelFung_MossSuper[1:8, c(-1, -2, -4,-5)], caption = "Header- crossfed fungus pellet with moss supernatant")
 
 
+num_sig_elluted<-nrow(crossfeed_PelFung_MossSuper %>% filter(p.value <= 0.05 & met_direction == "eluted_by fungus"))
+num_sig_uptake<-nrow(crossfeed_PelFung_MossSuper %>% filter(p.value <= 0.05 & met_direction == "uptake_up by fungus"))
 
+print(paste("# elluted fungal metabolites (p.value <= 0.05) is:", num_sig_elluted))
+print(paste("# taken fungal metabolites (p.value <= 0.05) is:", num_sig_uptake))
 
+#write_excel_csv(crossfeed_PelFung_MossSuper, "crossfeed_output_PelFung_MossSuper_halfstrength.csv")
 
-
-
-
-
-
-
+```
 
 
 
