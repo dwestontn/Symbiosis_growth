@@ -74,7 +74,6 @@ summary(tri.2017.aov) # assumes factors are independent. same outcome as above.
 
 TukeyHSD(tri.2017.aov, which = c("condition", "pH")) 
 # indicates that cyano_moss separate & cyano_moss symbiosis is nearly significant (p-value = 0.077). What drives the significant ANOVA appears to be the differences between cyano_moss_symbiosis and cyano_alone as well as the differences between cyano_moss_symbiosis and moss-alone. This confirms that grown together is more beneficial than grown apart and that being in proximity approximates being in contact (also better than being grown apart).
-
 ```
 
 ```{r 2017 Testing ANOVA assumptions}
@@ -95,6 +94,18 @@ library(car)
 leveneTest(delta_weight ~ condition*pH, data = tri.2017) # p value is significant. variance across groups is not homogenous. 
 ```
 
+```{r Nonparametric Tests}
+# heteroscedasticity-corrected coefficient covariance matrix
+library(car)
+tri.2017.aovadjust <- Anova(tri.2017.aov, white.adjust = TRUE)
+
+# Scheirer Ray Hare test
+library(rcompanion)
+tri.2017.srh <- scheirerRayHare(delta_weight ~ condition + pH, data = tri.2017)
+
+```
+
+# 2017 Data Transformations 
 ```{r 2017 Normality and Variance correction}
 # delta_weight untransformed
 weight <- tri.2017$delta_weight
@@ -126,9 +137,21 @@ hist(weight.log)
 qqnorm(weight.log)
 qqline(weight.log, col = "red")
 
+# exponential transformation 
+means <- aggregate(tri.2017$delta_weight, list(tri.2017$pH), mean)
+vars <- aggregate(tri.2017$delta_weight, list(tri.2017$pH), var)
+
+logmeans <- log10(means$x)
+logvars <- log10(vars$x)
+
+weight_mod <- lm(logvars ~ logmeans)
+summary(weight_mod) # slope = 1.508940
+
+# power = 1 - (b/2)
+1 - (1.508940/2) # 0.24553
 ```
 
-```{r 2017 Testing ANOVA - Transformed}
+```{r 2017 Testing ANOVA - Square root}
 # square root transformation
 
 tri.2017.transformed <- cbind(tri.2017, weight.sqrt)
@@ -147,6 +170,27 @@ plot(tri.2017.trans.aov, 1) # slight funnel, but not as severe as previously
 ## Levene's test  with multiple independent variables - variance check. more forgiving of departures from normal distribute
 library(car)
 leveneTest(weight.sqrt ~ condition*pH, data = tri.2017.transformed) # p value is significant. variance across groups is not homogenous. violation of ANOVA assumption
+```
+
+```{r Testing ANOVA - Exp Transform}
+# exponential transformation using power = 0.24553
+tri.2017.exp <- (tri.2017$delta_weight)^(0.24553) 
+tri.2017.trans2 <- cbind(tri.2017, tri.2017.exp)
+View(tri.2017.trans2)
+
+tri.2017.exp.aov <- aov(tri.2017.exp ~ condition + pH + condition:pH, data = tri.2017.trans2)
+summary(tri.2017.exp.aov) # no change in outcome of ANOVA
+
+## Shapiro-Wilk test - normality check
+tri2017.transresiduals2 <- residuals(object = tri.2017.exp.aov)
+shapiro.test(x = tri2017.transresiduals2) # p value is insignificant. normality is not violated.
+
+# ANOVA assumption: variance across groups are homogeneous
+plot(tri.2017.exp.aov, 1) 
+
+## Levene's test  with multiple independent variables
+library(car)
+leveneTest(tri.2017.exp ~ condition*pH, data = tri.2017.trans2) # p value is significant. variance across groups is not homogenous. violation of ANOVA assumption
 ```
 
 # Data Import and ANOVA for 2018
