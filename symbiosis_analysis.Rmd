@@ -629,7 +629,7 @@ print(paste("# taken fungal metabolites (p.value <= 0.05) is:", num_sig_uptake))
 
 ## metablite change when cyano pellet is crossfed with fungus supernantant
 
-Supernatant changes from 1) suernatant from moss pellet when incubated with fungus supernatant (Ph2-super-Nmusc-TacroSupp) compared to 2) fungus pellet only supernantant (Ph1-super-Tacro).
+Supernatant changes from 1) suernatant from cyano pellet when incubated with fungus supernatant (Ph2-super-Nmusc-TacroSupp) compared to 2) fungus pellet only supernantant (Ph1-super-Tacro).
 
 
 
@@ -671,14 +671,24 @@ crossfeed_PelCyano_FungSuper<-crossfeed_PelCyano_FungSuper %>% arrange(p.value)
 kable(crossfeed_PelCyano_FungSuper[1:8, c(-1, -2, -4,-5)], caption = "Header- crossfed moss pellet with fungus supernatant")
 
 
-num_sig_elluted<-nrow(crossfeed_PelCyano_FungSuper %>% filter(p.value <= 0.05 & met_direction == "eluted_by moss"))
-num_sig_uptake<-nrow(crossfeed_PelCyano_FungSuper %>% filter(p.value <= 0.05 & met_direction == "uptake_up by moss"))
+num_sig_elluted<-nrow(crossfeed_PelCyano_FungSuper %>% filter(p.value <= 0.05 & met_direction == "eluted_by cyano"))
+num_sig_uptake<-nrow(crossfeed_PelCyano_FungSuper %>% filter(p.value <= 0.05 & met_direction == "uptake_up by cyano"))
 
-print(paste("# elluted fungal metabolites (p.value <= 0.05) is:", num_sig_elluted))
-print(paste("# taken fungal metabolites (p.value <= 0.05) is:", num_sig_uptake))
+print(paste("# elluted cyano metabolites (p.value <= 0.05) is:", num_sig_elluted))
+print(paste("# taken cyano metabolites (p.value <= 0.05) is:", num_sig_uptake))
 
 #write_excel_csv(crossfeed_PelCyano_FungSuper, "crossfeed_PelCyano_FungSuper_halfstrength.csv")
 
 ```
+
+
+
+
+
+
+
+
+
+
 
 
