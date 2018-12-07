@@ -1,3 +1,8 @@
 .DS_Store
 .gitattributes
+
+#metabolite data
 data_formated_input_06262018.csv
+
+#powerpoint of figure 1
+fig1_powerpoint.pptx

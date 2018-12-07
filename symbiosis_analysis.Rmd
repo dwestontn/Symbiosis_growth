@@ -570,14 +570,115 @@ print(paste("# taken fungal metabolites (p.value <= 0.05) is:", num_sig_uptake))
 ```
 
 
+## metablite change when moss pellet is crossfed with fungus supernantant
+
+Goal -- determine significant changes in metabolites between fungus and moss using kruskal wallis test.
+
+
+Supernatant changes from 1) suernatant from moss pellet when incubated with fungus supernatant (Ph2-super-Sfallax-TacroSupp) compared to 2) fungus pellet only supernantant (Ph1-super-Tacro).
 
 
 
 
+```{r, echo=FALSE}
+
+k2<-met.dat %>% select(treat_cond, JGI_compound_id, peak_ht) %>% filter(treat_cond %in% c("Ph2-super-Sfallax-TacroSupp", "Ph1-super-Tacro"))
+
+#to account for the dillution from phase 1 to phase 2
+k2<-k2 %>% mutate(peak_ht = ifelse(treat_cond == "Ph1-super-Tacro", peak_ht/2, peak_ht * 1))
+k2$JGI_compound_id <- as.factor(k2$JGI_compound_id)
+k2$treat_cond <- as.factor(k2$treat_cond)
+
+#Kruskal Wallis test
+l2<- k2 %>% group_by(JGI_compound_id) %>% do(tidy(kruskal.test(x= .$peak_ht, g = .$treat_cond))) %>% select(JGI_compound_id, statistic, p.value)
+
+#datatable creation
+m2 <-k2 %>% filter(treat_cond == "Ph2-super-Sfallax-TacroSupp") %>% group_by(JGI_compound_id) %>% mutate(mean_Pelmoss_SupFung = mean(peak_ht)) %>% select(JGI_compound_id, mean_Pelmoss_SupFung) %>% unique()
+
+m22 <- k2 %>% filter(treat_cond == "Ph1-super-Tacro") %>% group_by(JGI_compound_id) %>% mutate(mean_super_fung = mean(peak_ht)) %>% select(JGI_compound_id, mean_super_fung) %>% unique()
+
+m32 <- left_join(m2,m22, by = "JGI_compound_id") %>% mutate(met_direction = ifelse(mean_Pelmoss_SupFung > mean_super_fung, "eluted_by moss",  "uptake_up by moss"))
+
+crossfeed_PelMoss_FungSuper<- met.dat %>% select(JGI_compound_id, compound_atlas_ID, label, Identified_metabolite) %>% unique()
+
+crossfeed_PelMoss_FungSuper$JGI_compound_id <-as.factor(crossfeed_PelMoss_FungSuper$JGI_compound_id)
+crossfeed_PelMoss_FungSuper$compound_atlas_ID <-as.factor(crossfeed_PelMoss_FungSuper$compound_atlas_ID)
+crossfeed_PelMoss_FungSuper$Identified_metabolite <-as.factor(crossfeed_PelMoss_FungSuper$Identified_metabolite)
+
+crossfeed_PelMoss_FungSuper<-as.data.frame(crossfeed_PelMoss_FungSuper)
+m32<-as.data.frame(m32)
+crossfeed_PelMoss_FungSuper <- left_join(m32, crossfeed_PelMoss_FungSuper, by = "JGI_compound_id")
+
+crossfeed_PelMoss_FungSuper<-left_join(l2, crossfeed_PelMoss_FungSuper, by = "JGI_compound_id")
+crossfeed_PelMoss_FungSuper<-crossfeed_PelMoss_FungSuper %>% arrange(p.value)
+
+#output
+kable(crossfeed_PelMoss_FungSuper[1:8, c(-1, -2, -4,-5)], caption = "Header- crossfed moss pellet with fungus supernatant")
+
+
+num_sig_elluted<-nrow(crossfeed_PelMoss_FungSuper %>% filter(p.value <= 0.05 & met_direction == "eluted_by moss"))
+num_sig_uptake<-nrow(crossfeed_PelMoss_FungSuper %>% filter(p.value <= 0.05 & met_direction == "uptake_up by moss"))
+
+print(paste("# elluted fungal metabolites (p.value <= 0.05) is:", num_sig_elluted))
+print(paste("# taken fungal metabolites (p.value <= 0.05) is:", num_sig_uptake))
+
+#write_excel_csv(crossfeed_PelMoss_FungSuper, "crossfeed_PelMoss_FungSuper_halfstrength.csv")
+
+```
+
+
+## metablite change when cyano pellet is crossfed with fungus supernantant
+
+Supernatant changes from 1) suernatant from moss pellet when incubated with fungus supernatant (Ph2-super-Nmusc-TacroSupp) compared to 2) fungus pellet only supernantant (Ph1-super-Tacro).
 
 
 
+########something is wrong with below code
+
+```{r, echo=FALSE}
+
+k23<-met.dat %>% select(treat_cond, JGI_compound_id, peak_ht) %>% filter(treat_cond %in% c("Ph2-super-Nmusc-TacroSupp", "Ph1-super-Tacro"))
+
+#to account for the dillution from phase 1 to phase 2
+k23<-k23 %>% mutate(peak_ht = ifelse(treat_cond == "Ph1-super-Tacro", peak_ht/2, peak_ht * 1))
+k23$JGI_compound_id <- as.factor(k23$JGI_compound_id)
+k23$treat_cond <- as.factor(k23$treat_cond)
+
+#Kruskal Wallis test
+l23<- k23 %>% group_by(JGI_compound_id) %>% do(tidy(kruskal.test(x= .$peak_ht, g = .$treat_cond))) %>% select(JGI_compound_id, statistic, p.value)
+
+#datatable creation
+m23 <-k23 %>% filter(treat_cond == "Ph2-super-Nmusc-TacroSupp") %>% group_by(JGI_compound_id) %>% mutate(mean_Pelcyano_SupFung = mean(peak_ht)) %>% select(JGI_compound_id, mean_Pelcyano_SupFung) %>% unique()
+
+m223 <- k23 %>% filter(treat_cond == "Ph1-super-Tacro") %>% group_by(JGI_compound_id) %>% mutate(mean_super_fung = mean(peak_ht)) %>% select(JGI_compound_id, mean_super_fung) %>% unique()
+
+m323 <- left_join(m23,m223, by = "JGI_compound_id") %>% mutate(met_direction = ifelse(mean_Pelcyano_SupFung > mean_super_fung, "eluted_by cyano",  "uptake_up by cyano"))
+
+crossfeed_PelCyano_FungSuper<- met.dat %>% select(JGI_compound_id, compound_atlas_ID, label, Identified_metabolite) %>% unique()
+
+crossfeed_PelCyano_FungSuper$JGI_compound_id <-as.factor(crossfeed_PelCyano_FungSuper$JGI_compound_id)
+crossfeed_PelCyano_FungSuper$compound_atlas_ID <-as.factor(crossfeed_PelCyano_FungSuper$compound_atlas_ID)
+crossfeed_PelCyano_FungSuper$Identified_metabolite <-as.factor(crossfeed_PelCyano_FungSuper$Identified_metabolite)
+
+crossfeed_PelCyano_FungSuper<-as.data.frame(crossfeed_PelCyano_FungSuper)
+m323<-as.data.frame(m323)
+crossfeed_PelCyano_FungSuper <- left_join(m323, crossfeed_PelCyano_FungSuper, by = "JGI_compound_id")
+
+crossfeed_PelCyano_FungSuper<-left_join(l23, crossfeed_PelCyano_FungSuper, by = "JGI_compound_id")
+crossfeed_PelCyano_FungSuper<-crossfeed_PelCyano_FungSuper %>% arrange(p.value)
+
+#output
+kable(crossfeed_PelCyano_FungSuper[1:8, c(-1, -2, -4,-5)], caption = "Header- crossfed moss pellet with fungus supernatant")
 
 
+num_sig_elluted<-nrow(crossfeed_PelCyano_FungSuper %>% filter(p.value <= 0.05 & met_direction == "eluted_by moss"))
+num_sig_uptake<-nrow(crossfeed_PelCyano_FungSuper %>% filter(p.value <= 0.05 & met_direction == "uptake_up by moss"))
+
+print(paste("# elluted fungal metabolites (p.value <= 0.05) is:", num_sig_elluted))
+print(paste("# taken fungal metabolites (p.value <= 0.05) is:", num_sig_uptake))
+
+#write_excel_csv(crossfeed_PelCyano_FungSuper, "crossfeed_PelCyano_FungSuper_halfstrength.csv")
+
+```
 
 
