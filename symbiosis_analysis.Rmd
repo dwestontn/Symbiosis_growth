@@ -243,7 +243,7 @@ Specifically testing if cyano and moss grown alone, increased in growth at a dif
 ```{r 2017 Sphagnum-Cyano Import}
 library(tidyverse)
 
-tri.2017 <- read.csv("~/Documents/Git/tripartite_symbiosis_paper/fallax_cyano_symbiosis_allyssa_colleen_2017.csv")
+tri.2017 <- read.csv("fallax_cyano_symbiosis_allyssa_colleen_2017.csv")
 View(tri.2017)
 
 tri.2017 <- tri.2017 %>% 
@@ -422,7 +422,7 @@ leveneTest(tri.2017.exp ~ condition*pH, data = tri.2017.trans2) # p value is sig
 
 library(tidyverse)
 
-tri.2018 <- read.csv("~/Documents/Git/tripartite_symbiosis_paper/fallax_cyano_symbiosis_colleen_10_01_2018.csv") %>% mutate(delta_weight = delta_weight_g *1000)
+tri.2018 <- read.csv("fallax_cyano_symbiosis_colleen_10_01_2018.csv") %>% mutate(delta_weight = delta_weight_g *1000)
 View(tri.2018)
 # Note: This is a baanced design. Proceed as normal.
 
