@@ -1118,6 +1118,26 @@ print(paste("# taken cyano metabolites (p.value <= 0.05) is:", num_sig_uptake))
 ```
 
 
+Cyano elluted metabolites when fed moss super
+
+```{r cars}
+
+crossfeed_PelCyano_MossSuper %>% filter(met_direction == "eluted_by cyano" & p.value <=0.05) %>% group_by(JGI_compound_id) %>% mutate(per_change_elluted = ((mean_Pelcyano_SupMoss - mean_super_moss)/mean_super_moss) * 100) %>% arrange(p.value, -per_change_elluted) %>% select(JGI_compound_id, label, p.value, per_change_elluted, mean_Pelcyano_SupMoss, mean_super_moss) %>% kable(., caption = "Cyano elluted metabolites when fed moss super")
+
+
+```
+
+
+
+
+Moss elluted metabolites when fed cyano super 
+
+```{r cars}
+
+crossfeed_PelCyano_MossSuper %>% filter(met_direction == "eluted_by cyano" & p.value <=0.05) %>% group_by(JGI_compound_id) %>% mutate(per_change_elluted = ((mean_Pelcyano_SupMoss - mean_super_moss)/mean_super_moss) * 100) %>% arrange(p.value, -per_change_elluted) %>% select(JGI_compound_id, label, p.value, per_change_elluted, mean_Pelcyano_SupMoss, mean_super_moss) %>% kable(., caption = "Cyano elluted metabolites when fed moss super")
+
+
+```
 
 
 
