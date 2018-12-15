@@ -1132,10 +1132,14 @@ crossfeed_PelCyano_MossSuper %>% filter(met_direction == "eluted_by cyano" & p.v
 
 Moss elluted metabolites when fed cyano super 
 
-```{r cars}
+```{r, echo=FALSE}
 
 crossfeed_PelCyano_MossSuper %>% filter(met_direction == "eluted_by cyano" & p.value <=0.05) %>% group_by(JGI_compound_id) %>% mutate(per_change_elluted = ((mean_Pelcyano_SupMoss - mean_super_moss)/mean_super_moss) * 100) %>% arrange(p.value, -per_change_elluted) %>% select(JGI_compound_id, label, p.value, per_change_elluted, mean_Pelcyano_SupMoss, mean_super_moss) %>% kable(., caption = "Cyano elluted metabolites when fed moss super")
 
+#to save table as csv
+#crossfeed_PelCyano_MossSuper <- crossfeed_PelCyano_MossSuper %>% filter(met_direction == "eluted_by cyano" & p.value <=0.05) %>% group_by(JGI_compound_id) %>% mutate(per_change_elluted = ((mean_Pelcyano_SupMoss - mean_super_moss)/mean_super_moss) * 100) %>% arrange(p.value, -per_change_elluted) %>% select(JGI_compound_id, label, p.value, per_change_elluted, mean_Pelcyano_SupMoss, mean_super_moss)
+
+#write.csv(crossfeed_PelCyano_MossSuper, "crossfeed_PelCyano_MossSuper.csv")
 
 ```
 
