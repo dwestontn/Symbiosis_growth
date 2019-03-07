@@ -167,8 +167,8 @@ need experimental details here...
 ### Growth 2017 data import and summary
 
 ```{r, warning = FALSE, message = FALSE}
-
-dat2 <- read_csv("fallax_cyano_symbiosis_allyssa_colleen_2017.csv")
+library(tidyverse)
+dat2 <- read.csv("fallax_cyano_symbiosis_allyssa_colleen_2017.csv")
 dat3 <- dat2 %>% filter(pH == 3.5 | pH == 5.5 | pH == 8.5)
 names(dat3)
 summary(dat3)
@@ -290,9 +290,14 @@ Confirms similar info to 2018 data. Cyano & moss grown together have higher weig
 tri.2017.aov <- aov(delta_weight ~ condition + pH + condition:pH, data = tri.2017)
 summary(tri.2017.aov) # assumes factors are independent. same outcome as above. 
 
-# Both condition and pH are significant in controlling growth, with condition being the most significant variable.the interaction term is not significant suggesting that pH and condition influence growth independently of each other
+# Both condition and pH are significant in controlling growth, with condition being the most significant variable.the interaction term is not significant suggesting that pH and condition influence growth independently of each other. thus we do post-hoc tests just on the main effects
 
-TukeyHSD(tri.2017.aov, which = c("condition", "pH")) 
+TukeyHSD(tri.2017.aov, which = c("condition", "pH"))
+
+# compact letter display for each factor
+cld(lsmeans(tri.2017.aov, ~condition))
+cld(lsmeans(tri.2017.aov, ~pH))
+
 # indicates that cyano_moss separate & cyano_moss symbiosis is nearly significant (p-value = 0.077). What drives the significant ANOVA appears to be the differences between cyano_moss_symbiosis and cyano_alone as well as the differences between cyano_moss_symbiosis and moss-alone. This confirms that grown together is more beneficial than grown apart and that being in proximity approximates being in contact (also better than being grown apart).
 ```
 
@@ -312,17 +317,6 @@ plot(tri.2017.aov, 1) # funnel indicative of violation of homogeneous variance
 ## Levene's test (more forgiving of departures from normal distribution)
 library(car)
 leveneTest(delta_weight ~ condition*pH, data = tri.2017) # p value is significant. variance across groups is not homogenous. 
-```
-
-```{r 2017 Nonparametric Tests}
-# heteroscedasticity-corrected coefficient covariance matrix
-library(car)
-tri.2017.aovadjust <- Anova(tri.2017.aov, white.adjust = TRUE)
-
-# Scheirer Ray Hare test
-library(rcompanion)
-tri.2017.srh <- scheirerRayHare(delta_weight ~ condition + pH, data = tri.2017)
-
 ```
 
 #### 2017 Data Transformations 
@@ -411,6 +405,12 @@ plot(tri.2017.exp.aov, 1)
 ## Levene's test  with multiple independent variables
 library(car)
 leveneTest(tri.2017.exp ~ condition*pH, data = tri.2017.trans2) # p value is significant. variance across groups is not homogenous. violation of ANOVA assumption
+```
+
+```{r Testing ANOVA - BoxCox Transform}
+library(caret)
+distBCMod <- 
+
 ```
 
 ### ANOVA analysis of 2018
