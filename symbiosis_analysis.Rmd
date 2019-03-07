@@ -14,7 +14,6 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-
 library(captioner)
 library(knitr)
 fig_nums <- captioner(prefix = "Fig.")
@@ -241,8 +240,6 @@ t+facet_grid(.~pH)
 Specifically testing if cyano and moss grown alone, increased in growth at a different rate than when grown together in smbiosis.
 
 ```{r 2017 Sphagnum-Cyano Import}
-library(tidyverse)
-
 tri.2017 <- read.csv("fallax_cyano_symbiosis_allyssa_colleen_2017.csv")
 View(tri.2017)
 
