@@ -361,8 +361,8 @@ logvars <- log10(vars$x)
 weight_mod <- lm(logvars ~ logmeans)
 summary(weight_mod) # slope = 1.508940
 
-# power = 1 - (b/2)
-1 - (1.508940/2) # 0.24553
+1 - (1.508940/2) # 0.24553 is the power
+
 ```
 
 ```{r 2017 Testing ANOVA - Square root}
@@ -386,6 +386,29 @@ library(car)
 leveneTest(weight.sqrt ~ condition*pH, data = tri.2017.transformed) # p value is significant. variance across groups is not homogenous. violation of ANOVA assumption
 ```
 
+```{r Testing ANOVA - Cube Transform}
+
+# include cube root just for comparison
+tri.2017.cube <- cbind(tri.2017, weight.cubed)
+tri.2017.cube$pH <- as.factor(tri.2017.cube$pH)
+str(tri.2017.cube)
+
+tri.2017.exp.aov <- aov(weight.cubed ~ condition + pH + condition:pH, data = tri.2017.cube)
+summary(tri.2017.exp.aov) # no change in outcome of ANOVA
+
+## Shapiro-Wilk test - normality check
+tri2017.transresiduals2 <- residuals(object = tri.2017.exp.aov)
+shapiro.test(x = tri2017.transresiduals2) # p value is significant. normality is violated.
+
+# ANOVA assumption: variance across groups are homogeneous
+plot(tri.2017.exp.aov, 1) 
+
+## Levene's test  with multiple independent variables
+library(car)
+leveneTest(weight.cubed ~ condition*pH, data = tri.2017.cube) # not homogenous.
+```
+
+
 ```{r Testing ANOVA - Exp Transform}
 # exponential transformation using power = 0.24553
 tri.2017.exp <- (tri.2017$delta_weight)^(0.24553) 
@@ -407,11 +430,21 @@ library(car)
 leveneTest(tri.2017.exp ~ condition*pH, data = tri.2017.trans2) # p value is significant. variance across groups is not homogenous. violation of ANOVA assumption
 ```
 
-```{r Testing ANOVA - BoxCox Transform}
-library(caret)
-distBCMod <- 
+# Rank Transform
+```{r}
+
+weight.rank <- rank(tri.2017$delta_weight)
+tri.2017 <- cbind(tri.2017, weight.rank)
+tri.2017$pH <- as.factor(tri.2017$pH)
+
+tri2017.rank.aov <- aov(weight.rank ~ condition + pH + condition:pH, data = tri.2017)
+summary(tri2017.rank.aov)
+
+TukeyHSD(tri2017.rank.aov, which = "condition")
+TukeyHSD(tri2017.rank.aov, which = "pH")
 
 ```
+
 
 ### ANOVA analysis of 2018
 
