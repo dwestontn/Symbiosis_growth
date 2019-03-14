@@ -64,101 +64,14 @@ The symbiosis between Sphagnum mosses and cyanobacteria has long been recognized
 *tests
   +simple scatter and boxplots to view realtionship
 
-
-### Growth 2018 data import and summary
-
-```{r, warning = FALSE, message = FALSE}
-library(tidyverse)
-#knitr by default will set the working directory to the source file location
-#setwd("~/Documents/Manuscripts:data/Symbiosis_study_2018")
-dat1 <- read_csv("fallax_cyano_symbiosis_colleen_10_01_2018.csv") %>% mutate(delta_weight = delta_weight_g *1000)
-names(dat1)
-summary(dat1)
-dim(dat1)
-
-```
-
-### Growth 2018 data boxplot analysis
-  1. Delta growth (weight) by organism regardless of pH; 2. Delta growth by organism and by pH; 3. Delta growth for entier wel by pH
-  
-```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.1_cap}
-
-ggplot(dat1, aes(color = component_measured,y= delta_weight, x= component_measured)) +
-  geom_boxplot(position=position_dodge(.8)) +
-  geom_jitter(position=position_dodge(.8)) +
-  theme(axis.text=element_text(size=12),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        axis.title=element_text(size=16,face="bold"),
-        legend.text=element_text(size=16))
-
-```
-
-
-```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.2_cap}
-
-t<-ggplot(dat1, aes(color = component_measured, y= delta_weight, x= component_measured)) +
-  geom_boxplot(position=position_dodge(.8)) +
-  geom_jitter(position=position_dodge(.8)) +
-  theme(axis.text=element_text(size=12),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        axis.title=element_text(size=16,face="bold"),
-        legend.text=element_text(size=16))
-t+facet_grid(.~initial_pH)
-
-```
-
-
-```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.3_cap}
-
-dat.well<-dat1 %>% filter(component_measured == "Cyanobacteria_moss_symbiosis")
-t<-ggplot(dat.well, aes(y= delta_weight, x= component_measured)) +
-  geom_boxplot(position=position_dodge(.8)) +
-  geom_jitter(position=position_dodge(.8)) +
-  theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=16,face="bold"),
-        legend.text=element_text(size=16))
-t+facet_grid(.~initial_pH)
-
-```
-
-
-```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.4_cap}
-
-dat.ph.change<-dat1 %>% mutate(pH_change = final_pH - initial_pH)
-
-t<-ggplot(dat.ph.change, aes(color = component_measured, y= pH_change, x= component_measured)) +
-  geom_boxplot(position=position_dodge(.8)) +
-  geom_jitter(position=position_dodge(.8)) +
-  theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=16,face="bold"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        legend.text=element_text(size=16))
-t+facet_grid(.~initial_pH)
-
-
-
-```
-
-
-
-```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.5_cap}
-dat.ph.abs.change<-dat1 %>% mutate(abs_pH_change = abs(final_pH - initial_pH))
-
-t<-ggplot(dat.ph.abs.change, aes(color = component_measured, y= abs_pH_change, x= component_measured)) +
-  geom_boxplot(position=position_dodge(.8)) +
-  geom_jitter(position=position_dodge(.8)) +
-  theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=16,face="bold"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        legend.text=element_text(size=16))
-t+facet_grid(.~initial_pH)
-
-```
-
-
 ## Growth 2017 symbiosis approach and measurements
 
 need experimental details here...
+
+
+
+## Growth 2017 Statistical Analysis and Results
+The experiment was a 4 x 3 factorial design with Condition and pH as factors. Condition refers to the spectrum of interactions between moss and cyanobacteria with moss grown either alone (moss_alone), with cyanobacteria (Cyanobacteria_moss_symbiosis), separated with a filter (Cyanobacteria_moss_seperate), and lastly, with cyanobacteria grown alone (cyano_alone). Moss and cyanobacteria in each treatment were each grown in pH 3.5, pH 5.5, or pH 8.5 (n = 6 for each Condition and pH combination). Growth data based on the difference between final and initial weight of moss were rank transformed prior to performing a two-way ANOVA using Condition and pH as independent variables and an alpha = 0.05 to denote significance. Post-hoc tests using Tukey's HSD was performed to determine differences between Condition and pH.
 
 
 
@@ -229,9 +142,6 @@ t<-ggplot(dat.combined, aes(color = condition,y= delta_weight, x= condition)) +
         axis.title=element_text(size=16,face="bold"),
         legend.text=element_text(size=16))
 t+facet_grid(.~pH)
-
-
-
 ```
 
 
@@ -430,7 +340,7 @@ library(car)
 leveneTest(tri.2017.exp ~ condition*pH, data = tri.2017.trans2) # p value is significant. variance across groups is not homogenous. violation of ANOVA assumption
 ```
 
-# Rank Transform
+## 2017 Rank Transform
 ```{r}
 
 weight.rank <- rank(tri.2017$delta_weight)
@@ -438,15 +348,106 @@ tri.2017 <- cbind(tri.2017, weight.rank)
 tri.2017$pH <- as.factor(tri.2017$pH)
 
 tri2017.rank.aov <- aov(weight.rank ~ condition + pH + condition:pH, data = tri.2017)
-summary(tri2017.rank.aov)
-
-TukeyHSD(tri2017.rank.aov, which = "condition")
-TukeyHSD(tri2017.rank.aov, which = "pH")
+Anova(tri2017.rank.aov, type = 3)
+TukeyHSD(tri2017.rank.aov)
 
 ```
 
 
-### ANOVA analysis of 2018
+
+# Growth 2018 data import and summary
+
+```{r, warning = FALSE, message = FALSE}
+library(tidyverse)
+#knitr by default will set the working directory to the source file location
+#setwd("~/Documents/Manuscripts:data/Symbiosis_study_2018")
+dat1 <- read_csv("fallax_cyano_symbiosis_colleen_10_01_2018.csv") %>% mutate(delta_weight = delta_weight_g *1000)
+names(dat1)
+summary(dat1)
+dim(dat1)
+
+```
+
+## Growth 2018 data boxplot analysis
+  1. Delta growth (weight) by organism regardless of pH; 2. Delta growth by organism and by pH; 3. Delta growth for entier wel by pH
+  
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.1_cap}
+
+ggplot(dat1, aes(color = component_measured,y= delta_weight, x= component_measured)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+
+```
+
+
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.2_cap}
+
+t<-ggplot(dat1, aes(color = component_measured, y= delta_weight, x= component_measured)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+t+facet_grid(.~initial_pH)
+
+```
+
+
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.3_cap}
+
+dat.well<-dat1 %>% filter(component_measured == "Cyanobacteria_moss_symbiosis")
+t<-ggplot(dat.well, aes(y= delta_weight, x= component_measured)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+t+facet_grid(.~initial_pH)
+
+```
+
+
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.4_cap}
+
+dat.ph.change<-dat1 %>% mutate(pH_change = final_pH - initial_pH)
+
+t<-ggplot(dat.ph.change, aes(color = component_measured, y= pH_change, x= component_measured)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=16,face="bold"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        legend.text=element_text(size=16))
+t+facet_grid(.~initial_pH)
+
+
+
+```
+
+
+
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.5_cap}
+dat.ph.abs.change<-dat1 %>% mutate(abs_pH_change = abs(final_pH - initial_pH))
+
+t<-ggplot(dat.ph.abs.change, aes(color = component_measured, y= abs_pH_change, x= component_measured)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=16,face="bold"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        legend.text=element_text(size=16))
+t+facet_grid(.~initial_pH)
+
+```
+
+
+
+## ANOVA analysis of 2018
 
 ```{r 2018 Spagnum_Cyano Import}
 
