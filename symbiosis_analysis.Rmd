@@ -73,8 +73,11 @@ need experimental details here...
 ## Growth 2017 Statistical Analysis and Results
 The experiment was a 4 x 3 factorial design with Condition and pH as factors. Condition refers to the spectrum of interactions between moss and cyanobacteria with moss grown either alone (moss_alone), with cyanobacteria (Cyanobacteria_moss_symbiosis), separated with a filter (Cyanobacteria_moss_seperate), and lastly, with cyanobacteria grown alone (cyano_alone). Moss and cyanobacteria in each treatment were each grown in pH 3.5, pH 5.5, or pH 8.5 (n = 6 for each Condition and pH combination). Growth data based on the difference between final and initial weight of moss were rank transformed prior to performing a two-way ANOVA using Condition and pH as independent variables and an alpha = 0.05 to denote significance. Post-hoc tests using Tukey's HSD was performed to determine differences between Condition and pH.
 
+The driving determinant for growth was Condition (p < 0.01), with moss growth with cyanobacteria (cyanobacteria_moss_symbiosis) producing the highest biomass (74.77 g +/- 30.69 at pH 8.5). Regardless of the pH, moss grown with cyanobacteria consistently grew more than moss that was separated from cyanobacteria using a filter (54 g +/- 51.43 at pH 8.5; p < 0.05) and moss grown alone (24.24 g +/- 15.35 at pH 8.5; p < 0.05). There was no significant difference between moss grown alone and moss separated from cyanobacteria ( p = 0.81).
 
+As expected, cyanobacterial mass was significantly lower (29.80 g +/- at pH 8.5; p < 0.05) and differed greatly when compared to cyano growth with moss either together (p < 0.05) and separated with a filter (p < 0.05). However, cyanobacteria grown alone did not differ to moss grown alone (24.25 +/- at pH 8.5; p = 0.10). Additionally, moss grown alone was similar to moss separated from cyanobacteria (p = 0.82), suggesting that direct contact between cyanobacteria and moss is necessary to increasing growth under any pH.
 
+Although pH did not significantly alter growth within each condition, there was a trend of increasing mean biomass with increasing biomass. Without exception, growth in each condition was higher at pH 8.5, particularly in moss grown directly with cyanobacteria and moss separated from cyanobacteria with a filter. These two conditions consistently yielded the highest biomass, with cyanobacteria grown alone typically having the lowest (1.38 g +/- 9.17 at pH 3.5 and 5.64 g +/- 16.41 at pH 5.5).
 
 
 ### Growth 2017 data import and summary
@@ -349,7 +352,7 @@ tri.2017$pH <- as.factor(tri.2017$pH)
 
 tri2017.rank.aov <- aov(weight.rank ~ condition + pH + condition:pH, data = tri.2017)
 Anova(tri2017.rank.aov, type = 3)
-TukeyHSD(tri2017.rank.aov)
+TukeyHSD(tri2017.rank.aov, which = "condition")
 
 ```
 
