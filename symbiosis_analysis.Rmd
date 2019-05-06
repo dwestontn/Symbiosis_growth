@@ -14,7 +14,6 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-
 library(captioner)
 library(knitr)
 fig_nums <- captioner(prefix = "Fig.")
@@ -65,8 +64,301 @@ The symbiosis between Sphagnum mosses and cyanobacteria has long been recognized
 *tests
   +simple scatter and boxplots to view realtionship
 
+## Growth 2017 symbiosis approach and measurements
 
-### Growth 2018 data import and summary
+need experimental details here...
+
+
+
+## Growth 2017 Statistical Analysis and Results
+The experiment was a 4 x 3 factorial design with Condition and pH as factors. Condition refers to the spectrum of interactions between moss and cyanobacteria with moss grown either alone (moss_alone), with cyanobacteria (Cyanobacteria_moss_symbiosis), separated with a filter (Cyanobacteria_moss_seperate), and lastly, with cyanobacteria grown alone (cyano_alone). Moss and cyanobacteria in each treatment were each grown in pH 3.5, pH 5.5, or pH 8.5 (n = 6 for each Condition and pH combination). Growth data based on the difference between final and initial weight of moss were rank transformed prior to performing a two-way ANOVA using Condition and pH as independent variables and an alpha = 0.05 to denote significance. Post-hoc tests using Tukey's HSD was performed to determine differences between Condition and pH.
+
+The driving determinant for growth was Condition (p < 0.01), with moss growth with cyanobacteria (cyanobacteria_moss_symbiosis) producing the highest biomass (74.77 g +/- 30.69 at pH 8.5). Regardless of the pH, moss grown with cyanobacteria consistently grew more than moss that was separated from cyanobacteria using a filter (54 g +/- 51.43 at pH 8.5; p < 0.05) and moss grown alone (24.24 g +/- 15.35 at pH 8.5; p < 0.05). There was no significant difference between moss grown alone and moss separated from cyanobacteria ( p = 0.81).
+
+As expected, cyanobacterial mass was significantly lower (29.80 g +/- at pH 8.5; p < 0.05) and differed greatly when compared to cyano growth with moss either together (p < 0.05) and separated with a filter (p < 0.05). However, cyanobacteria grown alone did not differ to moss grown alone (24.25 +/- at pH 8.5; p = 0.10). Additionally, moss grown alone was similar to moss separated from cyanobacteria (p = 0.82), suggesting that direct contact between cyanobacteria and moss is necessary to increasing growth under any pH.
+
+Although pH did not significantly alter growth within each condition, there was a trend of increasing mean biomass with increasing biomass. Without exception, growth in each condition was higher at pH 8.5, particularly in moss grown directly with cyanobacteria and moss separated from cyanobacteria with a filter. These two conditions consistently yielded the highest biomass, with cyanobacteria grown alone typically having the lowest (1.38 g +/- 9.17 at pH 3.5 and 5.64 g +/- 16.41 at pH 5.5).
+
+
+### Growth 2017 data import and summary
+
+```{r, warning = FALSE, message = FALSE}
+library(tidyverse)
+dat2 <- read.csv("fallax_cyano_symbiosis_allyssa_colleen_2017.csv")
+dat3 <- dat2 %>% filter(pH == 3.5 | pH == 5.5 | pH == 8.5)
+names(dat3)
+summary(dat3)
+dim(dat3)
+
+```
+
+
+### Boxplot analysis of 2017 data
+
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.6_cap}
+
+ggplot(dat3, aes(color = condition,y= delta_weight, x= condition)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+
+
+```
+
+
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.7_cap}
+
+t<-ggplot(dat3, aes(color = condition,y= delta_weight, x= condition)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+t+facet_grid(.~pH)
+
+```
+
+
+
+
+```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.8_cap}
+
+dat.2018 <- dat1 %>% filter(component_measured == "moss_alone" | component_measured == "cyano_alone" | component_measured == "Cyanobacteria_moss_symbiosis" |
+                              component_measured =="Cyanobacteria_moss_seperate") %>%
+  select(condition = component_measured, pH = initial_pH, delta_weight) %>%
+  mutate(condition = paste0(condition, "_2018"))
+
+dat.2017 <- dat3 %>% select(condition, pH, delta_weight) %>%
+  mutate(condition = paste0(condition, "_2017"))
+
+dat.combined<-rbind(dat.2018, dat.2017)
+
+
+t<-ggplot(dat.combined, aes(color = condition,y= delta_weight, x= condition)) +
+  geom_boxplot(position=position_dodge(.8)) +
+  geom_jitter(position=position_dodge(.8)) +
+  theme(axis.text=element_text(size=12),
+        axis.text.x = element_text(angle = 90, vjust = 0.5),
+        axis.title=element_text(size=16,face="bold"),
+        legend.text=element_text(size=16))
+t+facet_grid(.~pH)
+```
+
+
+### ANOVA analysis of 2017
+
+Specifically testing if cyano and moss grown alone, increased in growth at a different rate than when grown together in smbiosis.
+
+```{r 2017 Sphagnum-Cyano Import}
+tri.2017 <- read.csv("fallax_cyano_symbiosis_allyssa_colleen_2017.csv")
+View(tri.2017)
+
+tri.2017 <- tri.2017 %>% 
+  select(pH = pH, condition = condition, delta_weight) %>%
+  filter(pH == "3.5" | pH == "5.5" | pH == "8.5") %>% 
+  filter(condition == "moss_alone" | condition == "cyano_alone" | condition == "Cyanobacteria_moss_symbiosis" | condition =="Cyanobacteria_moss_seperate")
+View(tri.2017)
+str(tri.2017)
+
+tri.2017$pH <- factor(tri.2017$pH, 
+                      levels = c(3.5, 5.5, 8.5), 
+                      labels = c("pH_3.5", "pH_5.5", "pH_8.5"))
+
+table(tri.2017$pH, tri.2017$condition) # balanced design
+```
+
+```{r 2017 Summary statistics and graphs}
+
+tri.2017.sum <- tri.2017 %>% 
+  group_by(pH, condition) %>%
+  summarise(
+    count = n(),
+    mean = mean(delta_weight, na.rm = TRUE),
+    sd = sd(delta_weight, na.rm = TRUE)
+  ) %>% 
+  arrange(condition, pH)
+View(tri.2017.sum)
+
+# double checking figures in Dave's notebook
+ggplot(data = tri.2017.sum, aes(x = pH, y = mean, colour = condition)) + geom_point()
+#shows that at all pH cyano_moss symbiosis is higher, suggesting a symbiotic relationship
+
+# recreating Fig. 1
+ggplot(data = tri.2017, aes(x = condition, y = delta_weight, colour = condition)) + geom_boxplot() + geom_point()
+
+# recreating Fig. 2
+ggplot(data = tri.2017, aes(x = condition, y = delta_weight, colour = condition)) + geom_boxplot() + geom_point() + facet_grid(. ~ pH)
+
+# recreating Fig 3
+ggplot(data = tri.2017, aes(x = pH, y = delta_weight)) + geom_boxplot() + geom_point()
+```
+
+Confirms similar info to 2018 data. Cyano & moss grown together have higher weight than grown separate or grown alone. Higher pHs correspond to produce higher growth with the symbiotic relationship increasing growth response as pH increases. 
+
+```{r 2017 Two-way ANOVA}
+# factors: condition * pH
+tri.2017.aov <- aov(delta_weight ~ condition + pH + condition:pH, data = tri.2017)
+summary(tri.2017.aov) # assumes factors are independent. same outcome as above. 
+
+# Both condition and pH are significant in controlling growth, with condition being the most significant variable.the interaction term is not significant suggesting that pH and condition influence growth independently of each other. thus we do post-hoc tests just on the main effects
+
+TukeyHSD(tri.2017.aov, which = c("condition", "pH"))
+
+# compact letter display for each factor
+cld(lsmeans(tri.2017.aov, ~condition))
+cld(lsmeans(tri.2017.aov, ~pH))
+
+# indicates that cyano_moss separate & cyano_moss symbiosis is nearly significant (p-value = 0.077). What drives the significant ANOVA appears to be the differences between cyano_moss_symbiosis and cyano_alone as well as the differences between cyano_moss_symbiosis and moss-alone. This confirms that grown together is more beneficial than grown apart and that being in proximity approximates being in contact (also better than being grown apart).
+```
+
+```{r 2017 Testing ANOVA assumptions}
+# ANOVA assumption: data is normally distributed
+plot(tri.2017.aov, 2)
+
+## Shapiro-Wilk test - normality check
+tri2017.residuals <- residuals(object = tri.2017.aov)
+shapiro.test(x = tri2017.residuals) # p value is significant. normality is violated. data will need to be transformed.
+
+# ANOVA assumption: variance across groups are homogeneous
+plot(tri.2017.aov, 1) # funnel indicative of violation of homogeneous variance
+
+## cannot use Bartlett's test for variance check because normality is violated
+
+## Levene's test (more forgiving of departures from normal distribution)
+library(car)
+leveneTest(delta_weight ~ condition*pH, data = tri.2017) # p value is significant. variance across groups is not homogenous. 
+```
+
+#### 2017 Data Transformations 
+```{r 2017 Normality and Variance correction}
+# delta_weight untransformed
+weight <- tri.2017$delta_weight
+View(weight)
+
+hist(tri.2017$delta_weight)
+qqnorm(weight)
+qqline(weight, col = "red")
+# positively skewed options: square root, cube root, and log
+
+# square root transform
+weight.sqrt <- sqrt(weight) # NAs produced bc negative numbers
+hist(weight.sqrt)
+qqnorm(weight.sqrt)
+qqline(weight.sqrt, col = "red")
+
+# include cube root just for comparison
+weight.cubed <- sign(weight) * abs(weight)^(1/3)
+hist(weight.cubed)
+qqnorm(weight.cubed)
+qqline(weight.cubed, col = "red")
+
+# log transformation is more commonly used for size data
+weight.log <- weight + 22.33 # attempting to make all values positive without changing relative differences
+weight.log <- log10(weight.log)
+View(weight.log)
+
+hist(weight.log)
+qqnorm(weight.log)
+qqline(weight.log, col = "red")
+
+# exponential transformation 
+means <- aggregate(tri.2017$delta_weight, list(tri.2017$pH), mean)
+vars <- aggregate(tri.2017$delta_weight, list(tri.2017$pH), var)
+
+logmeans <- log10(means$x)
+logvars <- log10(vars$x)
+
+weight_mod <- lm(logvars ~ logmeans)
+summary(weight_mod) # slope = 1.508940
+
+1 - (1.508940/2) # 0.24553 is the power
+
+```
+
+```{r 2017 Testing ANOVA - Square root}
+# square root transformation
+
+tri.2017.transformed <- cbind(tri.2017, weight.sqrt)
+View(tri.2017.transformed)
+
+tri.2017.trans.aov <- aov(weight.sqrt ~ condition + pH + condition:pH, data = tri.2017.transformed)
+summary(tri.2017.trans.aov) # no change in outcome of ANOVA
+
+## Shapiro-Wilk test - normality check
+tri2017.transresiduals <- residuals(object = tri.2017.trans.aov)
+shapiro.test(x = tri2017.transresiduals) # p value is insignificant. normality is not violated.
+
+# ANOVA assumption: variance across groups are homogeneous
+plot(tri.2017.trans.aov, 1) # slight funnel, but not as severe as previously 
+
+## Levene's test  with multiple independent variables - variance check. more forgiving of departures from normal distribute
+library(car)
+leveneTest(weight.sqrt ~ condition*pH, data = tri.2017.transformed) # p value is significant. variance across groups is not homogenous. violation of ANOVA assumption
+```
+
+```{r Testing ANOVA - Cube Transform}
+
+# include cube root just for comparison
+tri.2017.cube <- cbind(tri.2017, weight.cubed)
+tri.2017.cube$pH <- as.factor(tri.2017.cube$pH)
+str(tri.2017.cube)
+
+tri.2017.exp.aov <- aov(weight.cubed ~ condition + pH + condition:pH, data = tri.2017.cube)
+summary(tri.2017.exp.aov) # no change in outcome of ANOVA
+
+## Shapiro-Wilk test - normality check
+tri2017.transresiduals2 <- residuals(object = tri.2017.exp.aov)
+shapiro.test(x = tri2017.transresiduals2) # p value is significant. normality is violated.
+
+# ANOVA assumption: variance across groups are homogeneous
+plot(tri.2017.exp.aov, 1) 
+
+## Levene's test  with multiple independent variables
+library(car)
+leveneTest(weight.cubed ~ condition*pH, data = tri.2017.cube) # not homogenous.
+```
+
+
+```{r Testing ANOVA - Exp Transform}
+# exponential transformation using power = 0.24553
+tri.2017.exp <- (tri.2017$delta_weight)^(0.24553) 
+tri.2017.trans2 <- cbind(tri.2017, tri.2017.exp)
+View(tri.2017.trans2)
+
+tri.2017.exp.aov <- aov(tri.2017.exp ~ condition + pH + condition:pH, data = tri.2017.trans2)
+summary(tri.2017.exp.aov) # no change in outcome of ANOVA
+
+## Shapiro-Wilk test - normality check
+tri2017.transresiduals2 <- residuals(object = tri.2017.exp.aov)
+shapiro.test(x = tri2017.transresiduals2) # p value is insignificant. normality is not violated.
+
+# ANOVA assumption: variance across groups are homogeneous
+plot(tri.2017.exp.aov, 1) 
+
+## Levene's test  with multiple independent variables
+library(car)
+leveneTest(tri.2017.exp ~ condition*pH, data = tri.2017.trans2) # p value is significant. variance across groups is not homogenous. violation of ANOVA assumption
+```
+
+## 2017 Rank Transform
+```{r}
+
+weight.rank <- rank(tri.2017$delta_weight)
+tri.2017 <- cbind(tri.2017, weight.rank)
+tri.2017$pH <- as.factor(tri.2017$pH)
+
+tri2017.rank.aov <- aov(weight.rank ~ condition + pH + condition:pH, data = tri.2017)
+Anova(tri2017.rank.aov, type = 3)
+TukeyHSD(tri2017.rank.aov, which = "condition")
+
+```
+
+
+
+# Growth 2018 data import and summary
 
 ```{r, warning = FALSE, message = FALSE}
 library(tidyverse)
@@ -79,7 +371,7 @@ dim(dat1)
 
 ```
 
-### Growth 2018 data boxplot analysis
+## Growth 2018 data boxplot analysis
   1. Delta growth (weight) by organism regardless of pH; 2. Delta growth by organism and by pH; 3. Delta growth for entier wel by pH
   
 ```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.1_cap}
@@ -157,303 +449,21 @@ t+facet_grid(.~initial_pH)
 ```
 
 
-## Growth 2017 symbiosis approach and measurements
-
-need experimental details here...
-
-
-
-
-
-### Growth 2017 data import and summary
-
-```{r, warning = FALSE, message = FALSE}
-
-dat2 <- read_csv("fallax_cyano_symbiosis_allyssa_colleen_2017.csv")
-dat3 <- dat2 %>% filter(pH == 3.5 | pH == 5.5 | pH == 8.5)
-names(dat3)
-summary(dat3)
-dim(dat3)
-
-```
-
-
-### Boxplot analysis of 2017 data
-
-```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.6_cap}
-
-ggplot(dat3, aes(color = condition,y= delta_weight, x= condition)) +
-  geom_boxplot(position=position_dodge(.8)) +
-  geom_jitter(position=position_dodge(.8)) +
-  theme(axis.text=element_text(size=12),
-        axis.title=element_text(size=16,face="bold"),
-        legend.text=element_text(size=16))
-
-
-```
-
-
-```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.7_cap}
-
-t<-ggplot(dat3, aes(color = condition,y= delta_weight, x= condition)) +
-  geom_boxplot(position=position_dodge(.8)) +
-  geom_jitter(position=position_dodge(.8)) +
-  theme(axis.text=element_text(size=12),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        axis.title=element_text(size=16,face="bold"),
-        legend.text=element_text(size=16))
-t+facet_grid(.~pH)
-
-```
-
-
-
-```{r, echo=FALSE, fig.width = 15, fig.height=10, fig.align='center',fig.cap = fig.8_cap}
-
-dat.2018 <- dat1 %>% filter(component_measured == "moss_alone" | component_measured == "cyano_alone" | component_measured == "Cyanobacteria_moss_symbiosis" |
-                              component_measured =="Cyanobacteria_moss_seperate") %>%
-  select(condition = component_measured, pH = initial_pH, delta_weight) %>%
-  mutate(condition = paste0(condition, "_2018"))
-
-dat.2017 <- dat3 %>% select(condition, pH, delta_weight) %>%
-  mutate(condition = paste0(condition, "_2017"))
-
-dat.combined<-rbind(dat.2018, dat.2017)
-
-
-t<-ggplot(dat.combined, aes(color = condition,y= delta_weight, x= condition)) +
-  geom_boxplot(position=position_dodge(.8)) +
-  geom_jitter(position=position_dodge(.8)) +
-  theme(axis.text=element_text(size=12),
-        axis.text.x = element_text(angle = 90, vjust = 0.5),
-        axis.title=element_text(size=16,face="bold"),
-        legend.text=element_text(size=16))
-t+facet_grid(.~pH)
-
-
-
-```
-
-
-## ANOVA analysis of 2017
-
-Specifically testing if cyano and moss grown alone, increased in growth at a different rate than when grown together in smbiosis.
-
-
-2017 Sphagnum-Cyano Import
-```{r, echo=FALSE}
-
-library(tidyverse)
-
-tri.2017 <- read.csv("fallax_cyano_symbiosis_allyssa_colleen_2017.csv")
-#View(tri.2017)
-
-tri.2017 <- tri.2017 %>% 
-  select(pH = pH, condition = condition, delta_weight) %>%
-  filter(pH == "3.5" | pH == "5.5" | pH == "8.5") %>% 
-  filter(condition == "moss_alone" | condition == "cyano_alone" | condition == "Cyanobacteria_moss_symbiosis" | condition =="Cyanobacteria_moss_seperate")
-#View(tri.2017)
-#str(tri.2017)
-
-tri.2017$pH <- factor(tri.2017$pH, 
-                      levels = c(3.5, 5.5, 8.5), 
-                      labels = c("pH_3.5", "pH_5.5", "pH_8.5"))
-
-#table(tri.2017$pH, tri.2017$condition) # balanced design
-```
-
-
-2017 Summary statistics and graphs
-
-```{r, echo=FALSE}
-
-tri.2017.sum <- tri.2017 %>% 
-  group_by(pH, condition) %>%
-  summarise(
-    count = n(),
-    mean = mean(delta_weight, na.rm = TRUE),
-    sd = sd(delta_weight, na.rm = TRUE)
-  ) %>% 
-  arrange(condition, pH)
-#View(tri.2017.sum)
-
-# double checking figures in Dave's notebook
-ggplot(data = tri.2017.sum, aes(x = pH, y = mean, colour = condition)) + geom_point()
-#shows that at all pH cyano_moss symbiosis is higher, suggesting a symbiotic relationship
-
-# recreating Fig. 1
-ggplot(data = tri.2017, aes(x = condition, y = delta_weight, colour = condition)) + geom_boxplot() + geom_point()
-
-# recreating Fig. 2
-ggplot(data = tri.2017, aes(x = condition, y = delta_weight, colour = condition)) + geom_boxplot() + geom_point() + facet_grid(. ~ pH)
-
-# recreating Fig 3
-ggplot(data = tri.2017, aes(x = pH, y = delta_weight)) + geom_boxplot() + geom_point()
-```
-
-Confirms similar info to 2018 data. Cyano & moss grown together have higher weight than grown separate or grown alone. Higher pHs correspond to produce higher growth with the symbiotic relationship increasing growth response as pH increases. 
-
-
-2017 Two-way ANOVA
-```{r, echo=FALSE }
-# factors: condition * pH
-tri.2017.aov <- aov(delta_weight ~ condition + pH + condition:pH, data = tri.2017)
-summary(tri.2017.aov) # assumes factors are independent. same outcome as above. 
-
-# Both condition and pH are significant in controlling growth, with condition being the most significant variable.the interaction term is not significant suggesting that pH and condition influence growth independently of each other
-
-TukeyHSD(tri.2017.aov, which = c("condition", "pH")) 
-# indicates that cyano_moss separate & cyano_moss symbiosis is nearly significant (p-value = 0.077). What drives the significant ANOVA appears to be the differences between cyano_moss_symbiosis and cyano_alone as well as the differences between cyano_moss_symbiosis and moss-alone. This confirms that grown together is more beneficial than grown apart and that being in proximity approximates being in contact (also better than being grown apart).
-```
-
-
-2017 Testing ANOVA assumptions
-
-```{r, echo=FALSE}
-# ANOVA assumption: data is normally distributed
-plot(tri.2017.aov, 2)
-
-## Shapiro-Wilk test - normality check
-tri2017.residuals <- residuals(object = tri.2017.aov)
-shapiro.test(x = tri2017.residuals) # p value is significant. normality is violated. data will need to be transformed.
-
-# ANOVA assumption: variance across groups are homogeneous
-plot(tri.2017.aov, 1) # funnel indicative of violation of homogeneous variance
-
-## cannot use Bartlett's test for variance check because normality is violated
-
-## Levene's test (more forgiving of departures from normal distribution)
-library(car)
-leveneTest(delta_weight ~ condition*pH, data = tri.2017) # p value is significant. variance across groups is not homogenous. 
-```
-
-
-2017 Nonparametric Tests
-
-```{r, echo=FALSE}
-# heteroscedasticity-corrected coefficient covariance matrix
-library(car)
-tri.2017.aovadjust <- Anova(tri.2017.aov, white.adjust = TRUE)
-
-# Scheirer Ray Hare test
-library(rcompanion)
-tri.2017.srh <- scheirerRayHare(delta_weight ~ condition + pH, data = tri.2017)
-
-```
-
-### 2017 Data Transformations 
-
-2017 Normality and Variance correction
-
-```{r, echo=FALSE}
-# delta_weight untransformed
-weight <- tri.2017$delta_weight
-#View(weight)
-
-hist(tri.2017$delta_weight)
-qqnorm(weight)
-qqline(weight, col = "red")
-# positively skewed options: square root, cube root, and log
-
-# square root transform
-weight.sqrt <- sqrt(weight) # NAs produced bc negative numbers
-hist(weight.sqrt)
-qqnorm(weight.sqrt)
-qqline(weight.sqrt, col = "red")
-
-# include cube root just for comparison
-weight.cubed <- sign(weight) * abs(weight)^(1/3)
-hist(weight.cubed)
-qqnorm(weight.cubed)
-qqline(weight.cubed, col = "red")
-
-# log transformation is more commonly used for size data
-weight.log <- weight + 22.33 # attempting to make all values positive without changing relative differences
-weight.log <- log10(weight.log)
-#View(weight.log)
-
-hist(weight.log)
-qqnorm(weight.log)
-qqline(weight.log, col = "red")
-
-# exponential transformation 
-means <- aggregate(tri.2017$delta_weight, list(tri.2017$pH), mean)
-vars <- aggregate(tri.2017$delta_weight, list(tri.2017$pH), var)
-
-logmeans <- log10(means$x)
-logvars <- log10(vars$x)
-
-weight_mod <- lm(logvars ~ logmeans)
-summary(weight_mod) # slope = 1.508940
-
-# power = 1 - (b/2)
-1 - (1.508940/2) # 0.24553
-```
-
-2017 Testing ANOVA - Square root
-
-```{r, echo=FALSE}
-# square root transformation
-
-tri.2017.transformed <- cbind(tri.2017, weight.sqrt)
-#View(tri.2017.transformed)
-
-tri.2017.trans.aov <- aov(weight.sqrt ~ condition + pH + condition:pH, data = tri.2017.transformed)
-summary(tri.2017.trans.aov) # no change in outcome of ANOVA
-
-## Shapiro-Wilk test - normality check
-tri2017.transresiduals <- residuals(object = tri.2017.trans.aov)
-shapiro.test(x = tri2017.transresiduals) # p value is insignificant. normality is not violated.
-
-# ANOVA assumption: variance across groups are homogeneous
-plot(tri.2017.trans.aov, 1) # slight funnel, but not as severe as previously 
-
-## Levene's test  with multiple independent variables - variance check. more forgiving of departures from normal distribute
-library(car)
-leveneTest(weight.sqrt ~ condition*pH, data = tri.2017.transformed) # p value is significant. variance across groups is not homogenous. violation of ANOVA assumption
-```
-
-
-Testing ANOVA - Exp Transform
-
-```{r, echo=FALSE }
-# exponential transformation using power = 0.24553
-tri.2017.exp <- (tri.2017$delta_weight)^(0.24553) 
-tri.2017.trans2 <- cbind(tri.2017, tri.2017.exp)
-#View(tri.2017.trans2)
-
-tri.2017.exp.aov <- aov(tri.2017.exp ~ condition + pH + condition:pH, data = tri.2017.trans2)
-summary(tri.2017.exp.aov) # no change in outcome of ANOVA
-
-## Shapiro-Wilk test - normality check
-tri2017.transresiduals2 <- residuals(object = tri.2017.exp.aov)
-shapiro.test(x = tri2017.transresiduals2) # p value is insignificant. normality is not violated.
-
-# ANOVA assumption: variance across groups are homogeneous
-plot(tri.2017.exp.aov, 1) 
-
-## Levene's test  with multiple independent variables
-library(car)
-leveneTest(tri.2017.exp ~ condition*pH, data = tri.2017.trans2) # p value is significant. variance across groups is not homogenous. violation of ANOVA assumption
-```
 
 ## ANOVA analysis of 2018
 
-
-2018 Spagnum_Cyano Import
-
-```{r, echo=FALSE}
+```{r 2018 Spagnum_Cyano Import}
 
 library(tidyverse)
 
 tri.2018 <- read.csv("fallax_cyano_symbiosis_colleen_10_01_2018.csv") %>% mutate(delta_weight = delta_weight_g *1000)
-#View(tri.2018)
+View(tri.2018)
 # Note: This is a baanced design. Proceed as normal.
 
 tri.2018 <- tri.2018 %>% 
   select(pH = initial_pH, condition = component_measured, delta_weight) %>%
   filter(condition == "moss_alone" | condition == "cyano_alone" | condition == "Cyanobacteria_moss_symbiosis" | condition =="Cyanobacteria_moss_seperate")
-#View(tri.2018)
+View(tri.2018)
 str(tri.2018)
 
 tri.2018$pH <- factor(tri.2018$pH, 
@@ -467,11 +477,7 @@ str(tri.2018)
 table(tri.2018$pH, tri.2018$condition) 
 ```
 
-
-
-2018 Summary statistics and graphs
-
-```{r, echo=FALSE}
+```{r 2018 Summary statistics and graphs}
 
 tri.2018.sum <- tri.2018 %>% 
   group_by(pH, condition) %>%
@@ -481,7 +487,7 @@ tri.2018.sum <- tri.2018 %>%
     sd = sd(delta_weight, na.rm = TRUE)
   ) %>% 
   arrange(condition, pH)
-#View(tri.2018.sum)
+View(tri.2018.sum)
 
 ggplot(data = tri.2018.sum, aes(x = pH, y = mean, colour = condition)) + geom_point()
 #shows that at pH 5.5+, that cyano_moss symbiosis is higher, suggesting a symbiotic relationship
@@ -498,9 +504,7 @@ ggplot(data = tri.2018, aes(x = pH, y = delta_weight)) + geom_boxplot() + geom_p
 
 Data suggests that growth is driven by both condition and pH and that condition influences responses to pH. Graphs show support for the idea that at higher pH there is increased growth of Sphagnum, indicative of a symbiotic relationship. 
 
- 2018 Two-way ANOVA
-
-```{r, echo=FALSE}
+```{r 2018 Two-way ANOVA}
 # factors: condition * pH
 tri.2018.aov <- aov(delta_weight ~ condition + pH + condition:pH, data = tri.2018)
 summary(tri.2018.aov) # assumes factors are independent. same outcome as above. 
@@ -514,10 +518,7 @@ TukeyHSD(tri.2018.aov, which = c("condition", "pH")) # indicates that cyano_moss
 
 Main question is if cyano_alone and moss_alone grew at different rate than cyano_moss_symbiosis. Graphs show that cyano_moss_symbiosis grows more at high pH, but Tukey HSD suggests that at p-value < 0.05, cyano_moss_symbiosis is only significantly different from cyano_alone and that cyano_moss_separated is different from cyano_alone. This suggests that cyano grows better when in contact or proximity with moss. cyano_moss_separate is nearly significantly different from moss alone (p-value = 0.09 at p-value < 0.1) perhaps indicating that moss benefits marginally from proximity to cyano (hormogonia?), but not as much as cyano benefits from proximity of moss. 
 
-
-2018 Testing ANOVA assumptions
-
-```{r, echo=FALSE}
+```{r 2018 Testing ANOVA assumptions}
 
 # ANOVA assumption: data is normally distributed
 plot(tri.2018.aov, 2)
@@ -540,11 +541,8 @@ leveneTest(delta_weight ~ condition*pH, data = tri.2018) # p value not significa
 # http://www.sthda.com/english/wiki/compare-multiple-sample-variances-in-r
 ```
 
-## Comparison 2017 & 2018
-
-All Data Summary Stats
-
-```{r, echo=FALSE}
+### Comparison 2017 & 2018
+```{r All Data Summary Stats}
 # Creating giant dataset
 year <- rep("2017", length(tri.2017$pH))
 tri.2017 <- cbind(year, tri.2017)
@@ -553,7 +551,7 @@ year <- rep("2018", length(tri.2018$pH))
 tri.2018 <- cbind(year, tri.2018)
 
 alldata <- rbind(tri.2017, tri.2018)
-#View(alldata)
+View(alldata)
 
 # Summary Stats
 alldata.sum <- alldata %>% 
@@ -564,13 +562,10 @@ alldata.sum <- alldata %>%
     sd = sd(delta_weight, na.rm = TRUE)
   )
 
-#View(alldata.sum)
+View(alldata.sum)
 ```
 
-
-ANOVAs with factor(year)
-
-```{r, echo=FALSE}
+```{r ANOVAs with factor(year)}
 year.condition <- aov(delta_weight ~ year + condition + year:condition, data = alldata)
 summary(year.condition)
 TukeyHSD(year.condition, which = c("year", "condition"))
@@ -582,21 +577,18 @@ year <- aov(delta_weight ~ year, data = alldata) # year is not significant
 summary(year)
 ```
 
-
-pH 3.5 t-tests
-
-```{r, echo=FALSE}
+```{r pH 3.5 t-tests}
 # in lieue of two-way repeated meaasures ANOVA
 #  condition = cyano_alone
 ph3.5_cyano_alone_2017 <- tri.2017 %>% 
   filter(pH == "pH_3.5") %>% 
   filter(condition == "cyano_alone")
-#View(ph3.5_cyano_alone_2017)
+View(ph3.5_cyano_alone_2017)
 
 ph3.5_cyano_alone_2018 <- tri.2018 %>%
   filter(pH == "pH_3.5") %>% 
   filter(condition == "cyano_alone")
-#View(ph3.5_cyano_alone_2018)
+View(ph3.5_cyano_alone_2018)
 
 t.test(ph3.5_cyano_alone_2017$delta_weight, ph3.5_cyano_alone_2018$delta_weight) # not significant
 
@@ -604,12 +596,12 @@ t.test(ph3.5_cyano_alone_2017$delta_weight, ph3.5_cyano_alone_2018$delta_weight)
 ph3.5_moss_alone_2017 <- tri.2017 %>% 
   filter(pH == "pH_3.5") %>% 
   filter(condition == "moss_alone")
-#View(ph3.5_moss_alone_2017)
+View(ph3.5_moss_alone_2017)
 
 ph3.5_moss_alone_2018 <- tri.2018 %>%
   filter(pH == "pH_3.5") %>% 
   filter(condition == "moss_alone")
-#View(ph3.5_moss_alone_2018)
+View(ph3.5_moss_alone_2018)
 
 t.test(ph3.5_moss_alone_2017$delta_weight, ph3.5_moss_alone_2018$delta_weight) # not significant
 
@@ -617,12 +609,12 @@ t.test(ph3.5_moss_alone_2017$delta_weight, ph3.5_moss_alone_2018$delta_weight) #
 ph3.5_cmseparate_2017 <- tri.2017 %>% 
   filter(pH == "pH_3.5") %>% 
   filter(condition == "Cyanobacteria_moss_seperate")
-#View(ph3.5_cmseparate_2017)
+View(ph3.5_cmseparate_2017)
 
 ph3.5_cmseparate_2018 <- tri.2018 %>%
   filter(pH == "pH_3.5") %>% 
   filter(condition == "Cyanobacteria_moss_seperate")
-#View(ph3.5_cmseparate_2018)
+View(ph3.5_cmseparate_2018)
 
 t.test(ph3.5_cmseparate_2017$delta_weight, ph3.5_cmseparate_2018$delta_weight) # not significant
 
@@ -630,29 +622,28 @@ t.test(ph3.5_cmseparate_2017$delta_weight, ph3.5_cmseparate_2018$delta_weight) #
 ph3.5_cmsymbiosis_2017 <- tri.2017 %>% 
   filter(pH == "pH_3.5") %>% 
   filter(condition == "Cyanobacteria_moss_symbiosis")
-#View(ph3.5_cmsymbiosis_2017)
+View(ph3.5_cmsymbiosis_2017)
 
 ph3.5_cmsymbiosis_2018 <- tri.2018 %>%
   filter(pH == "pH_3.5") %>% 
   filter(condition == "Cyanobacteria_moss_symbiosis")
-#View(ph3.5_cmsymbiosis_2018)
+View(ph3.5_cmsymbiosis_2018)
 
 t.test(ph3.5_cmsymbiosis_2017$delta_weight, ph3.5_cmsymbiosis_2018$delta_weight) # p-value = 0.06835
 ```
 
-pH 5.5 t-tests
 
-```{r, echo=FALSE}
+```{r pH 5.5 t-tests}
 #  condition = cyano_alone
 ph5.5_cyano_alone_2017 <- tri.2017 %>% 
   filter(pH == "pH_5.5") %>% 
   filter(condition == "cyano_alone")
-#View(ph5.5_cyano_alone_2017)
+View(ph5.5_cyano_alone_2017)
 
 ph5.5_cyano_alone_2018 <- tri.2018 %>%
   filter(pH == "pH_5.5") %>% 
   filter(condition == "cyano_alone")
-#View(ph5.5_cyano_alone_2018)
+View(ph5.5_cyano_alone_2018)
 
 t.test(ph5.5_cyano_alone_2017$delta_weight, ph5.5_cyano_alone_2018$delta_weight) # not significant
 
@@ -660,12 +651,12 @@ t.test(ph5.5_cyano_alone_2017$delta_weight, ph5.5_cyano_alone_2018$delta_weight)
 ph5.5_moss_alone_2017 <- tri.2017 %>% 
   filter(pH == "pH_5.5") %>% 
   filter(condition == "moss_alone")
-#View(ph5.5_moss_alone_2017)
+View(ph5.5_moss_alone_2017)
 
 ph5.5_moss_alone_2018 <- tri.2018 %>%
   filter(pH == "pH_5.5") %>% 
   filter(condition == "moss_alone")
-#View(ph5.5_moss_alone_2018)
+View(ph5.5_moss_alone_2018)
 
 t.test(ph5.5_moss_alone_2017$delta_weight, ph5.5_moss_alone_2018$delta_weight) # not significant
 
@@ -673,12 +664,12 @@ t.test(ph5.5_moss_alone_2017$delta_weight, ph5.5_moss_alone_2018$delta_weight) #
 ph5.5_cmseparate_2017 <- tri.2017 %>% 
   filter(pH == "pH_5.5") %>% 
   filter(condition == "Cyanobacteria_moss_seperate")
-#View(ph5.5_cmseparate_2017)
+View(ph5.5_cmseparate_2017)
 
 ph5.5_cmseparate_2018 <- tri.2018 %>%
   filter(pH == "pH_5.5") %>% 
   filter(condition == "Cyanobacteria_moss_seperate")
-#View(ph5.5_cmseparate_2018)
+View(ph5.5_cmseparate_2018)
 
 t.test(ph5.5_cmseparate_2017$delta_weight, ph5.5_cmseparate_2018$delta_weight) # not significant
 
@@ -686,29 +677,27 @@ t.test(ph5.5_cmseparate_2017$delta_weight, ph5.5_cmseparate_2018$delta_weight) #
 ph5.5_cmsymbiosis_2017 <- tri.2017 %>% 
   filter(pH == "pH_5.5") %>% 
   filter(condition == "Cyanobacteria_moss_symbiosis")
-#View(ph5.5_cmsymbiosis_2017)
+View(ph5.5_cmsymbiosis_2017)
 
 ph5.5_cmsymbiosis_2018 <- tri.2018 %>%
   filter(pH == "pH_5.5") %>% 
   filter(condition == "Cyanobacteria_moss_symbiosis")
-#View(ph5.5_cmsymbiosis_2018)
+View(ph5.5_cmsymbiosis_2018)
 
 t.test(ph5.5_cmsymbiosis_2017$delta_weight, ph5.5_cmsymbiosis_2018$delta_weight) # not significant
 ```
 
-pH 8.5 t-tests
-
-```{r, echo=FALSE}
+```{r pH 8.5 t-tests}
 #  condition = cyano_alone
 ph8.5_cyano_alone_2017 <- tri.2017 %>% 
   filter(pH == "pH_8.5") %>% 
   filter(condition == "cyano_alone")
-#View(ph8.5_cyano_alone_2017)
+View(ph8.5_cyano_alone_2017)
 
 ph8.5_cyano_alone_2018 <- tri.2018 %>%
   filter(pH == "pH_8.5") %>% 
   filter(condition == "cyano_alone")
-#View(ph8.5_cyano_alone_2018)
+View(ph8.5_cyano_alone_2018)
 
 t.test(ph8.5_cyano_alone_2017$delta_weight, ph8.5_cyano_alone_2018$delta_weight) # not significant
 
@@ -716,12 +705,12 @@ t.test(ph8.5_cyano_alone_2017$delta_weight, ph8.5_cyano_alone_2018$delta_weight)
 ph8.5_moss_alone_2017 <- tri.2017 %>% 
   filter(pH == "pH_8.5") %>% 
   filter(condition == "moss_alone")
-#View(ph8.5_moss_alone_2017)
+View(ph8.5_moss_alone_2017)
 
 ph8.5_moss_alone_2018 <- tri.2018 %>%
   filter(pH == "pH_8.5") %>% 
   filter(condition == "moss_alone")
-#View(ph8.5_moss_alone_2018)
+View(ph8.5_moss_alone_2018)
 
 t.test(ph8.5_moss_alone_2017$delta_weight, ph8.5_moss_alone_2018$delta_weight) # not significant
 
@@ -729,12 +718,12 @@ t.test(ph8.5_moss_alone_2017$delta_weight, ph8.5_moss_alone_2018$delta_weight) #
 ph8.5_cmseparate_2017 <- tri.2017 %>% 
   filter(pH == "pH_8.5") %>% 
   filter(condition == "Cyanobacteria_moss_seperate")
-#View(ph8.5_cmseparate_2017)
+View(ph8.5_cmseparate_2017)
 
 ph8.5_cmseparate_2018 <- tri.2018 %>%
   filter(pH == "pH_8.5") %>% 
   filter(condition == "Cyanobacteria_moss_seperate")
-#View(ph8.5_cmseparate_2018)
+View(ph8.5_cmseparate_2018)
 
 t.test(ph8.5_cmseparate_2017$delta_weight, ph8.5_cmseparate_2018$delta_weight) # not significant
 
@@ -742,19 +731,17 @@ t.test(ph8.5_cmseparate_2017$delta_weight, ph8.5_cmseparate_2018$delta_weight) #
 ph8.5_cmsymbiosis_2017 <- tri.2017 %>% 
   filter(pH == "pH_8.5") %>% 
   filter(condition == "Cyanobacteria_moss_symbiosis")
-#View(ph8.5_cmsymbiosis_2017)
+View(ph8.5_cmsymbiosis_2017)
 
 ph8.5_cmsymbiosis_2018 <- tri.2018 %>%
   filter(pH == "pH_8.5") %>% 
   filter(condition == "Cyanobacteria_moss_symbiosis")
-#View(ph8.5_cmsymbiosis_2018)
+View(ph8.5_cmsymbiosis_2018)
 
 t.test(ph8.5_cmsymbiosis_2017$delta_weight, ph8.5_cmsymbiosis_2018$delta_weight) # p-value = 0.06304
 ```
 
-2017 & 2018 Comparison Figure
-
-```{r, echo=FALSE}
+```{r 2017 & 2018 Comparison Figure}
 # boxplot
 tri.boxplot <- ggplot(data = alldata, aes(x = condition, y = delta_weight, fill = year)) + geom_boxplot(colour = "black") + 
   geom_point(aes(x = condition), pch = 21, position = position_jitterdodge()) + 
@@ -840,14 +827,6 @@ print(paste("# elluted cyanobacteria metabolites (p.value <= 0.05) is:", num_sig
 print(paste("# taken cyanobacteria metabolites (p.value <= 0.05) is:", num_sig_uptake))
 
 #write_excel_csv(crossfeed_PelCyano_MossSuper, "crossfeed_output_PelCyano_MossSuper_halfstrength.csv")
-#There are 277 metabolites measured in the cross feeding. to figure out which of the 277 were not eluted
-#in any of the samples, use this code:
-#trash<-met.dat %>% filter(treat_cond =="Ph1-super-Sfallax") %>% group_by(JGI_compound_id) %>% tally(peak_ht==0)
-#trash%>%filter(n==4)
-#view(trash)
-
-
-
 
 ```
 
@@ -1118,30 +1097,6 @@ print(paste("# taken cyano metabolites (p.value <= 0.05) is:", num_sig_uptake))
 ```
 
 
-Cyano elluted metabolites when fed moss super
-
-```{r cars}
-
-crossfeed_PelCyano_MossSuper %>% filter(met_direction == "eluted_by cyano" & p.value <=0.05) %>% group_by(JGI_compound_id) %>% mutate(per_change_elluted = ((mean_Pelcyano_SupMoss - mean_super_moss)/mean_super_moss) * 100) %>% arrange(p.value, -per_change_elluted) %>% select(JGI_compound_id, label, p.value, per_change_elluted, mean_Pelcyano_SupMoss, mean_super_moss) %>% kable(., caption = "Cyano elluted metabolites when fed moss super")
-
-
-```
-
-
-
-
-Moss elluted metabolites when fed cyano super 
-
-```{r, echo=FALSE}
-
-crossfeed_PelCyano_MossSuper %>% filter(met_direction == "eluted_by cyano" & p.value <=0.05) %>% group_by(JGI_compound_id) %>% mutate(per_change_elluted = ((mean_Pelcyano_SupMoss - mean_super_moss)/mean_super_moss) * 100) %>% arrange(p.value, -per_change_elluted) %>% select(JGI_compound_id, label, p.value, per_change_elluted, mean_Pelcyano_SupMoss, mean_super_moss) %>% kable(., caption = "Cyano elluted metabolites when fed moss super")
-
-#to save table as csv
-#crossfeed_PelCyano_MossSuper <- crossfeed_PelCyano_MossSuper %>% filter(met_direction == "eluted_by cyano" & p.value <=0.05) %>% group_by(JGI_compound_id) %>% mutate(per_change_elluted = ((mean_Pelcyano_SupMoss - mean_super_moss)/mean_super_moss) * 100) %>% arrange(p.value, -per_change_elluted) %>% select(JGI_compound_id, label, p.value, per_change_elluted, mean_Pelcyano_SupMoss, mean_super_moss)
-
-#write.csv(crossfeed_PelCyano_MossSuper, "crossfeed_PelCyano_MossSuper.csv")
-
-```
 
 
 
